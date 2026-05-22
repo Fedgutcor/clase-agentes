@@ -3,6 +3,9 @@ venv/
 __pycache__/
 *.pyc
 *.pyo
-memory/users/
+memory/users/*
+!memory/users/.gitkeep
+memory/conversations/*
+!memory/conversations/.gitkeep
 *.DS_Store
 logs/
