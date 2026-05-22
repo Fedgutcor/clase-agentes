@@ -72,6 +72,12 @@ venv\Scripts\activate           # Windows
 pip install -r requirements.txt
 ```
 
+> Si ya tenías `google-generativeai` instalado de antes, desinstálalo primero — este proyecto usa la SDK nueva (`google-genai`):
+> ```bash
+> pip uninstall google-generativeai -y
+> pip install -r requirements.txt
+> ```
+
 ### 4. Configura tus API keys
 
 ```bash

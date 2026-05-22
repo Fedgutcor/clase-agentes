@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 from google import genai
+from google.genai import errors as genai_errors
 from groq import Groq
 from rich.console import Console
 from rich.panel import Panel
@@ -25,7 +26,7 @@ gemini = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # --- Prompts ---
-SYSTEM = open("prompts/system.txt").read()
+SYSTEM = open("prompts/system.txt").read() + "\n" + open("prompts/personality.txt").read()
 
 # --- Router: decide qué modelo usar ---
 def choose_model(message: str) -> str:
@@ -48,7 +49,7 @@ def ask_ai(model: str, user_context: str, message: str) -> str:
     try:
         response = gemini.models.generate_content(model="gemini-2.0-flash", contents=prompt)
         return response.text
-    except Exception as e:
+    except (genai_errors.APIError, genai_errors.ServerError, genai_errors.ClientError) as e:
         logging.warning(f"Gemini falló ({e}), usando Groq como fallback")
         response = groq_client.chat.completions.create(
             model="llama-3.1-8b-instant",
