@@ -54,60 +54,29 @@
 ### 1. Clona el repo y entra a la carpeta
 
 ```bash
-git clone https://github.com/ultragresion/clase-agentes
+git clone https://github.com/Fedgutcor/clase-agentes
 cd clase-agentes
 ```
 
-### 2. Crea el entorno virtual
+### 2. Corre el setup guiado
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate        # Mac / Linux
-venv\Scripts\activate           # Windows
+python setup.py
 ```
 
-### 3. Instala dependencias
+Eso es todo. El script:
+- Crea el entorno virtual
+- Instala las dependencias
+- Te explica qué es cada API key y dónde obtenerla
+- Las guarda en `.env` de forma segura
+- Verifica que todo funcione
+
+### 3. Arranca el bot
 
 ```bash
-pip install -r requirements.txt
-```
+source venv/bin/activate   # Mac / Linux
+venv\Scripts\activate      # Windows
 
-> Si ya tenías `google-generativeai` instalado de antes, desinstálalo primero — este proyecto usa la SDK nueva (`google-genai`):
-> ```bash
-> pip uninstall google-generativeai -y
-> pip install -r requirements.txt
-> ```
-
-### 4. Configura tus API keys
-
-```bash
-cp .env.example .env
-```
-
-Abre `.env` y llena los tres valores:
-
-```bash
-open -e .env      # Mac
-notepad .env      # Windows
-```
-
-| Variable | Dónde obtenerla |
-|----------|-----------------|
-| `TELEGRAM_TOKEN` | Telegram → @BotFather → `/newbot` |
-| `GEMINI_API_KEY` | [aistudio.google.com](https://aistudio.google.com) → Get API key |
-| `GROQ_API_KEY` | [console.groq.com](https://console.groq.com) → API Keys → Create |
-
-> Los archivos `.` están ocultos por defecto. Si no ves `.env` en tu explorador de archivos, ábrelo directo desde la terminal con los comandos de arriba.
-
-### 5. Verifica que todo funciona
-
-```bash
-python verify_setup.py
-```
-
-Si ves tres checkmarks verdes, estás listo. Corre el bot:
-
-```bash
 python app.py
 ```
 
