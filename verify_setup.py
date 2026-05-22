@@ -52,8 +52,8 @@ check("Python >= 3.10",          assert_python,
       "Descarga Python 3.10+ desde python.org")
 check("python-telegram-bot",     lambda: __import__("telegram"),
       "pip install python-telegram-bot==21.9")
-check("google-generativeai",     lambda: __import__("google.generativeai"),
-      "pip install google-generativeai==0.8.3")
+check("google-genai",            lambda: __import__("google.genai"),
+      "pip install google-genai")
 check("groq",                    lambda: __import__("groq"),
       "pip install groq")
 check("python-dotenv",           lambda: __import__("dotenv"),

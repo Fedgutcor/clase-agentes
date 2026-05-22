@@ -3,7 +3,7 @@ import logging
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
-import google.generativeai as genai
+from google import genai
 from groq import Groq
 from rich.console import Console
 from rich.panel import Panel
@@ -21,8 +21,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 # --- Clientes IA ---
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-gemini = genai.GenerativeModel("gemini-2.0-flash")
+gemini = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # --- Prompts ---
@@ -47,7 +46,7 @@ def ask_ai(model: str, user_context: str, message: str) -> str:
 
     # Intenta Gemini; si falla (quota, error de red, etc.) cae a Groq
     try:
-        response = gemini.generate_content(prompt)
+        response = gemini.models.generate_content(model="gemini-2.0-flash", contents=prompt)
         return response.text
     except Exception as e:
         logging.warning(f"Gemini falló ({e}), usando Groq como fallback")
