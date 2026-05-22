@@ -5,6 +5,12 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 import google.generativeai as genai
 from groq import Groq
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
+from rich import box
+
+_console = Console()
 
 import memory as mem
 from tools.calculator import calculate
@@ -89,11 +95,34 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"{model_tag}{response}")
 
 # --- Main ---
+def _print_banner():
+    banner = Text()
+    banner.append("\n")
+    banner.append(" ██████╗  ██████╗ ████████╗\n", style="bold cyan")
+    banner.append("██╔══██╗██╔═══██╗╚══██╔══╝\n", style="bold cyan")
+    banner.append("██████╔╝██║   ██║   ██║\n",    style="bold cyan")
+    banner.append("██╔══██╗██║   ██║   ██║\n",    style="bold cyan")
+    banner.append("██████╔╝╚██████╔╝   ██║\n",    style="bold cyan")
+    banner.append("╚═════╝  ╚═════╝    ╚═╝\n",   style="bold cyan")
+    banner.append("\n")
+    banner.append("  🤖  AGENTE IA — ONLINE\n",   style="bold white")
+    banner.append("  Telegram · Gemini · Groq\n", style="dim")
+    _console.print(Panel(banner, border_style="cyan", box=box.DOUBLE, padding=(0, 2)))
+
+    _console.print()
+    _console.print("  [bold]Router activo[/bold]")
+    _console.print("  ├── [green]Gemini 2.0 Flash[/green]  [dim](default)[/dim]")
+    _console.print("  └── [yellow]Groq Llama 3.1[/yellow]   [dim](rápido / fallback)[/dim]")
+    _console.print()
+    _console.print("  [bold cyan]Escuchando mensajes...[/bold cyan]")
+    _console.print()
+
+
 if __name__ == "__main__":
     import asyncio
     asyncio.set_event_loop(asyncio.new_event_loop())
     token = os.getenv("TELEGRAM_TOKEN")
     app = ApplicationBuilder().token(token).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    print("Bot corriendo...")
+    _print_banner()
     app.run_polling()
