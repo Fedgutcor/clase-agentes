@@ -1,15 +1,15 @@
 """
 Tool: currency
 Uso en el bot: "convierte 100 USD a EUR" o "convierte 50000 COP a USD"
-Usa frankfurter.app (sin API key, datos del BCE).
+Usa frankfurter.app (sin API key, datos oficiales del Banco Central Europeo).
 """
 import urllib.request
 import json
 
 def convert_currency(amount: float, from_cur: str, to_cur: str) -> str:
     try:
-        from_cur = from_cur.upper()
-        to_cur = to_cur.upper()
+        from_cur = from_cur.upper()  # normalizamos a mayúsculas: "usd" → "USD"
+        to_cur   = to_cur.upper()
         url = f"https://api.frankfurter.app/latest?amount={amount}&from={from_cur}&to={to_cur}"
         with urllib.request.urlopen(url, timeout=5) as r:
             data = json.loads(r.read())
