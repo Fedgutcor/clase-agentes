@@ -8,9 +8,14 @@ import os
 # Estructura del archivo:
 # {
 #   "id": "123456789",
-#   "facts": ["estudia diseño", "vive en Bogotá"],   ← de "recuerda que..."
-#   "notes": ["comprar leche", "llamar al médico"]   ← de "guarda nota..."
+#   "facts": ["estudia diseño", "vive en Bogotá"],
+#   "notes": ["comprar leche", "llamar al médico"],
+#   "reminders": [
+#     {"message": "llamar al médico", "fires_at": 1716000000.0}
+#   ]
 # }
+# "fires_at" es un timestamp Unix: segundos desde el 1 de enero de 1970.
+# Es el formato estándar para guardar momentos en el tiempo — funciona en cualquier zona horaria.
 USERS_DIR = "memory/users"
 
 def load_user(user_id: str) -> dict:
@@ -18,7 +23,7 @@ def load_user(user_id: str) -> dict:
     os.makedirs(USERS_DIR, exist_ok=True)
     path = f"{USERS_DIR}/{user_id}.json"
     if not os.path.exists(path):
-        return {"id": user_id, "facts": [], "notes": []}
+        return {"id": user_id, "facts": [], "notes": [], "reminders": []}
     with open(path) as f:
         return json.load(f)
 
@@ -65,3 +70,41 @@ def get_notes(user_id: str) -> str:
     if not notes:
         return "No tienes notas guardadas."
     return "Tus notas:\n" + "\n".join(f"- {n}" for n in notes)
+
+# ── Recordatorios ─────────────────────────────────────────────────────────────
+
+def save_reminder(user_id: str, message: str, fires_at: float):
+    """
+    Persiste un recordatorio en el perfil del usuario.
+    fires_at: timestamp Unix del momento exacto en que debe dispararse.
+    """
+    user = load_user(user_id)
+    user.setdefault("reminders", []).append({"message": message, "fires_at": fires_at})
+    save_user(user_id, user)
+
+def delete_reminder(user_id: str, message: str, fires_at: float):
+    """Elimina un recordatorio del perfil una vez que se disparó."""
+    user = load_user(user_id)
+    user["reminders"] = [
+        r for r in user.get("reminders", [])
+        if not (r["message"] == message and r["fires_at"] == fires_at)
+    ]
+    save_user(user_id, user)
+
+def get_all_reminders() -> list[dict]:
+    """
+    Lee todos los perfiles y devuelve los recordatorios pendientes.
+    Se usa al arrancar el bot para reconstruir timers que sobrevivieron un reinicio.
+    Devuelve: [{"user_id": "...", "message": "...", "fires_at": 123456.0}, ...]
+    """
+    pending = []
+    if not os.path.exists(USERS_DIR):
+        return pending
+    for filename in os.listdir(USERS_DIR):
+        if not filename.endswith(".json"):
+            continue
+        user_id = filename[:-5]  # quita el ".json" para obtener el ID
+        user    = load_user(user_id)
+        for r in user.get("reminders", []):
+            pending.append({"user_id": user_id, **r})
+    return pending
