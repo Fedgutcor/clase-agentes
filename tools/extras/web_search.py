@@ -9,7 +9,7 @@ import json
 
 def search(query: str, max_results: int = 3) -> str:
     try:
-        encoded = urllib.parse.quote(query)
+        encoded = urllib.parse.quote(query)  # convierte espacios y caracteres especiales para URL
         url = f"https://api.duckduckgo.com/?q={encoded}&format=json&no_html=1&skip_disambig=1"
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=5) as r:
@@ -17,6 +17,7 @@ def search(query: str, max_results: int = 3) -> str:
 
         results = []
 
+        # DuckDuckGo devuelve dos tipos de contenido: un resumen (Abstract) y temas relacionados
         if data.get("AbstractText"):
             results.append(f"📌 {data['AbstractText'][:300]}")
 
