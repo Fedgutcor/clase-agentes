@@ -117,13 +117,50 @@ Este script hace todo por ti:
 - Instala las librerías necesarias
 - Te pregunta tus API keys y las guarda de forma segura en un archivo `.env`
 
-El script te explica cada key mientras lo corres. Si prefieres conseguirlas antes:
+El script te explica cada key mientras lo corres. Si prefieres conseguirlas antes, aquí está el paso a paso para cada una:
 
-| Key | Dónde obtenerla | Costo |
-|-----|-----------------|-------|
-| `TELEGRAM_TOKEN` | Habla con [@BotFather](https://t.me/BotFather) en Telegram, escribe `/newbot` y sigue las instrucciones | Gratis |
-| `GEMINI_API_KEY` | Entra a [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) y haz click en "Create API key" | Gratis |
-| `GROQ_API_KEY` | Entra a [console.groq.com/keys](https://console.groq.com/keys), crea cuenta y haz click en "Create API Key" | Gratis |
+---
+
+#### Token de Telegram — `TELEGRAM_TOKEN`
+
+1. Abre Telegram y busca **@BotFather** (el oficial tiene una palomita azul)
+2. Escribe `/newbot` y presiona Enter
+3. Te va a pedir un **nombre** para el bot (el que verán los usuarios, ej: "Mi Agente IA")
+4. Luego un **username** — debe terminar en `bot` (ej: `mi_agente_ia_bot`)
+5. BotFather te responde con un mensaje que incluye el token. Se ve así:
+   ```
+   Use this token to access the HTTP API:
+   7123456789:AAHdqTcvCH1vGWJxfSeofSPs38eEjcwdkjQ
+   ```
+6. Copia ese token — es tu `TELEGRAM_TOKEN`
+
+> El username del bot es cómo lo van a encontrar en Telegram. Una vez creado, puedes hablarle buscando `@mi_agente_ia_bot`.
+
+---
+
+#### API Key de Gemini — `GEMINI_API_KEY`
+
+1. Entra a [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
+2. Si te pide iniciar sesión, usa tu cuenta de Google
+3. Haz click en **"Create API key"**
+4. Selecciona **"Create API key in new project"**
+5. Se genera una clave. Se ve así: `AIzaSyD3k8...`
+6. Haz click en el ícono de copiar al lado de la clave
+
+> Guárdala en un lugar seguro — Google no te la vuelve a mostrar completa después de cerrar esa ventana. Si la pierdes, crea una nueva.
+
+---
+
+#### API Key de Groq — `GROQ_API_KEY`
+
+1. Entra a [console.groq.com](https://console.groq.com) y crea una cuenta (puedes usar Google)
+2. En el menú de la izquierda, haz click en **"API Keys"**
+3. Haz click en **"Create API Key"**
+4. Ponle un nombre (ej: "clase-agentes") — es solo para que tú la identifiques
+5. Se genera la clave. Se ve así: `gsk_abc123...`
+6. Cópiala en ese momento — Groq tampoco la vuelve a mostrar completa
+
+---
 
 ### Paso 2 — Activa el entorno virtual
 
