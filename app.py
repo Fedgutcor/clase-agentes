@@ -2,7 +2,7 @@ import os
 import logging
 from dotenv import load_dotenv
 from telegram import Update
-from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
+from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, filters, ContextTypes
 from google import genai
 from google.genai import errors as genai_errors
 from groq import Groq
@@ -83,14 +83,36 @@ def ask_ai(model: str, user_context: str, message: str) -> str:
         # El prefijo [fallback groq] avisa que no fue la respuesta principal
         return f"[fallback groq] {response.choices[0].message.content}"
 
-# ── Handler ───────────────────────────────────────────────────────────────────
-# Esta función se ejecuta cada vez que el bot recibe un mensaje.
+# ── Comando /start ────────────────────────────────────────────────────────────
+# Se ejecuta cuando alguien abre el bot por primera vez o escribe /start.
+# Es la primera impresión — debe explicar qué puede hacer el bot.
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    username = update.effective_user.first_name or "ahí"
+    await update.message.reply_text(
+        f"Hola, {username} 👋\n\n"
+        "Soy un agente de IA con memoria. Puedo:\n\n"
+        "🧠 Recordar cosas sobre ti\n"
+        "   → recuerda que estudio diseño\n\n"
+        "🗒 Guardar y listar tus notas\n"
+        "   → guarda nota comprar leche\n"
+        "   → mis notas\n\n"
+        "🔢 Hacer cuentas\n"
+        "   → calcula 45 * 12\n\n"
+        "⚡ Responder rápido con Groq\n"
+        "   → rápido qué es una API\n\n"
+        "Para todo lo demás, escríbeme y te respondo con Gemini. 🤖"
+    )
+    _console.print(f"  [dim cyan]▸[/dim cyan] /start — {username}")
+
+# ── Handler de mensajes ───────────────────────────────────────────────────────
+# Esta función se ejecuta cada vez que el bot recibe un mensaje de texto.
 # Es el corazón del agente: decide qué hacer con cada mensaje.
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id   = str(update.effective_user.id)   # ID único del usuario en Telegram
-    username  = update.effective_user.first_name or user_id
-    message   = update.message.text
+    user_id  = str(update.effective_user.id)   # ID único del usuario en Telegram
+    username = update.effective_user.first_name or user_id
+    message  = update.message.text
 
     _console.print(
         f"  [dim cyan]▸[/dim cyan] [bold]{username}[/bold] [dim]({user_id})[/dim]  "
@@ -176,7 +198,8 @@ if __name__ == "__main__":
     asyncio.set_event_loop(asyncio.new_event_loop())
     token = os.getenv("TELEGRAM_TOKEN")
     app   = ApplicationBuilder().token(token).build()
-    # Registramos el handler: cualquier mensaje de texto (no comando) llama a handle_message
+    # Registramos los handlers: /start para el onboarding, el resto para mensajes normales
+    app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     _print_banner()
     app.run_polling()  # el bot corre indefinidamente hasta que presionas Ctrl+C
