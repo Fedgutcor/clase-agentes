@@ -18,6 +18,7 @@ from rich import box
 import memory as mem
 from tools.calculator import calculate
 from tools.notes import save_note, list_notes
+from tools.extras.reminder import set_reminder, restore_reminders
 
 load_dotenv()  # carga las variables del archivo .env (tus API keys)
 
@@ -99,6 +100,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "   → mis notas\n\n"
         "🔢 Hacer cuentas\n"
         "   → calcula 45 * 12\n\n"
+        "⏰ Programar recordatorios\n"
+        "   → recuérdame en 10 minutos: llamar al médico\n\n"
         "⚡ Responder rápido con Groq\n"
         "   → rápido qué es una API\n\n"
         "Para todo lo demás, escríbeme y te respondo con Gemini. 🤖"
@@ -129,7 +132,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if message.lower().startswith("guarda nota "):
-        reply = save_note(user_id, message[12:])  # guardamos la nota para este usuario
+        reply = save_note(user_id, message[12:])
         _console.print(f"  [dim green]  ↳ nota guardada[/dim green]")
         await update.message.reply_text(reply)
         return
@@ -141,10 +144,31 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if message.lower().startswith("recuerda que "):
-        fact = message[13:]  # extrae el hecho: "recuerda que [esto]"
+        fact = message[13:]
         mem.add_fact(user_id, fact)
         _console.print(f"  [dim green]  ↳ memoria guardada[/dim green]")
         await update.message.reply_text(f"Lo recuerdo: {fact}")
+        return
+
+    if message.lower().startswith("recuérdame en ") or message.lower().startswith("recuerdame en "):
+        # Formato esperado: "recuérdame en 10 minutos: llamar al médico"
+        try:
+            rest    = message.split("en ", 1)[1]           # "10 minutos: llamar al médico"
+            parts   = rest.split(":", 1)                   # ["10 minutos", " llamar al médico"]
+            minutes = float(parts[0].strip().split()[0])   # 10
+            text    = parts[1].strip()                     # "llamar al médico"
+
+            async def send_reminder(msg):
+                await context.bot.send_message(chat_id=user_id, text=f"⏰ Recordatorio: {msg}")
+
+            reply = set_reminder(user_id, minutes, text, send_reminder)
+            _console.print(f"  [dim green]  ↳ recordatorio en {minutes} min[/dim green]")
+            await update.message.reply_text(reply)
+        except (IndexError, ValueError):
+            await update.message.reply_text(
+                "No entendí el formato. Prueba así:\n"
+                "recuérdame en 10 minutos: llamar al médico"
+            )
         return
 
     # Si no era una tool, consultamos la memoria del usuario y llamamos a la IA.
@@ -164,7 +188,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ── Banner ────────────────────────────────────────────────────────────────────
 # Solo visual: imprime el logo y el estado del router cuando arranca el bot.
 
-def _print_banner():
+def _print_banner(restored: int):
     banner = Text(justify="center")
     banner.append("\n")
     banner.append(" ██████╗  ██████╗ ████████╗\n", style="bold cyan")
@@ -188,6 +212,13 @@ def _print_banner():
     _console.print()
     _console.print(Padding("[bold]Router activo[/bold]", (0, 0, 0, 2)))
     _console.print(Padding(router, (0, 0, 0, 2)))
+
+    if restored:
+        _console.print(Padding(
+            f"[dim yellow]⏰ {restored} recordatorio(s) restaurado(s) del disco[/dim yellow]",
+            (0, 0, 0, 2)
+        ))
+
     _console.print(Padding("[bold cyan]Escuchando mensajes...[/bold cyan]", (0, 0, 1, 2)))
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -198,8 +229,18 @@ if __name__ == "__main__":
     asyncio.set_event_loop(asyncio.new_event_loop())
     token = os.getenv("TELEGRAM_TOKEN")
     app   = ApplicationBuilder().token(token).build()
+
     # Registramos los handlers: /start para el onboarding, el resto para mensajes normales
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    _print_banner()
+
+    # Reconstruimos los recordatorios que estaban pendientes antes del reinicio.
+    # get_callback recibe el user_id y devuelve la función que envía el mensaje por Telegram.
+    def get_callback(user_id):
+        async def send(msg):
+            await app.bot.send_message(chat_id=user_id, text=f"⏰ Recordatorio: {msg}")
+        return send
+
+    restored = restore_reminders(get_callback)
+    _print_banner(restored)
     app.run_polling()  # el bot corre indefinidamente hasta que presionas Ctrl+C
