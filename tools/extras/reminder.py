@@ -6,23 +6,29 @@ Nota: los recordatorios se pierden si reinicias el bot (no hay persistencia en e
 import threading
 import asyncio
 
-_pending: list[dict] = []
+_pending: list[dict] = []  # lista de recordatorios activos (en memoria, no en disco)
 
 def set_reminder(delay_minutes: float, message: str, callback) -> str:
     """
+    Programa un recordatorio para dentro de `delay_minutes` minutos.
+
     callback: función async que recibe el mensaje cuando se cumple el tiempo.
     En app.py úsalo así:
+
         async def send_reminder(msg):
             await update.message.reply_text(f"⏰ Recordatorio: {msg}")
         set_reminder(10, "llamar al médico", send_reminder)
     """
     def _fire():
+        # threading.Timer no puede ejecutar código async directamente,
+        # así que creamos un nuevo event loop solo para este momento
         loop = asyncio.new_event_loop()
         loop.run_until_complete(callback(message))
         loop.close()
 
+    # Timer inicia un hilo en segundo plano que espera `delay_minutes * 60` segundos
     t = threading.Timer(delay_minutes * 60, _fire)
-    t.daemon = True
+    t.daemon = True  # si el bot se cierra, el timer se cancela automáticamente
     t.start()
     _pending.append({"message": message, "minutes": delay_minutes, "timer": t})
 
