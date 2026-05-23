@@ -6,98 +6,172 @@
 
 ---
 
-## Arquitectura
+## Antes de empezar — tu primer repositorio en GitHub
 
-```
-┌─────────────────────────────────────────────────────┐
-│                     TELEGRAM                        │
-│              (canal de comunicación)                │
-└───────────────────────┬─────────────────────────────┘
-                        │ mensaje del usuario
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│                  HANDLE MESSAGE                     │
-│              (app.py · punto de entrada)            │
-└──────┬──────────────────────────┬───────────────────┘
-       │                          │
-       ▼                          ▼
-┌─────────────┐          ┌────────────────────┐
-│  TOOLS      │          │  ROUTER DE MODELOS │
-│  manuales   │          │  choose_model()    │
-│             │          └────────┬───────────┘
-│ calcula … ──┼──▶ calculator.py  │
-│ guarda … ───┼──▶ notes.py       ├── "rápido/rapido" ──▶ GROQ
-│ mis notas ──┼──▶ notes.py       │                      Llama 3.1
-│ recuerda ───┼──▶ memory.py      └── (default) ─────▶ GEMINI
-└─────────────┘                                        Flash 2.0
-                                                          │
-                                                          │ falla (quota/red)
-                                                          ▼
-                                                       GROQ (fallback)
-                                                       + prefijo [fallback]
-       │
-       ▼
-┌─────────────────────┐
-│  MEMORIA            │
-│  memory/users/      │
-│  {user_id}.json     │
-│  → hechos del user  │
-│    se inyectan en   │
-│    el prompt        │
-└─────────────────────┘
-```
+Si llegaste aquí desde GitHub por primera vez: estás mirando el **código fuente** del proyecto.  
+GitHub es como Google Drive, pero para código. Cada archivo que ves arriba es parte del bot que vas a construir.
 
----
-
-## Setup
-
-### 1. Clona el repo y entra a la carpeta
+Para descargar el proyecto a tu computadora:
 
 ```bash
 git clone https://github.com/Fedgutcor/clase-agentes
 cd clase-agentes
 ```
 
-### 2. Corre el setup guiado
+`git clone` descarga una copia completa. `cd clase-agentes` entra a la carpeta descargada.  
+**Haz esto una sola vez.** Después de clonarlo, trabajas desde tu computadora.
+
+---
+
+## Qué vas a construir
+
+Un bot de Telegram que:
+
+- Habla con dos modelos de IA (Gemini y Groq) y elige cuál usar según el mensaje
+- Recuerda información sobre cada usuario entre conversaciones
+- Tiene herramientas propias: calculadora, notas, y 10 extras que puedes conectar
+
+No es un chatbot de juguete — tiene la misma arquitectura base de los agentes de producción.
+
+---
+
+## Cómo está organizado el proyecto
+
+```
+clase-agentes/
+│
+├── app.py              ← el cerebro del bot — aquí empieza todo
+├── memory.py           ← cómo el bot guarda y recuerda datos de cada usuario
+├── setup.py            ← instalación guiada (corre esto primero)
+├── verify_setup.py     ← verifica que el setup esté completo
+│
+├── prompts/
+│   ├── system.txt      ← la personalidad del agente (qué le dijiste que ES)
+│   └── personality.txt ← instrucciones adicionales de comportamiento
+│
+├── tools/
+│   ├── calculator.py   ← herramienta: hace cuentas sin pedírselas a la IA
+│   ├── notes.py        ← herramienta: guarda y lista notas por usuario
+│   └── extras/         ← 10 herramientas opcionales listas para conectar
+│
+├── memory/
+│   └── users/          ← un archivo .json por usuario (se crea solo al correr)
+│
+├── requirements.txt    ← lista de librerías que necesita el proyecto
+├── .env.example        ← plantilla para tus API keys (sin datos reales)
+└── .env                ← tus keys reales (nunca se sube a GitHub)
+```
+
+**Tres conceptos clave que vas a ver en el código:**
+
+| Concepto | Qué es en este proyecto |
+|----------|------------------------|
+| **Tool** | Una función Python que el agente puede ejecutar (calculadora, notas) |
+| **Memoria** | Archivo JSON por usuario — el bot lo lee antes de responder |
+| **Router** | Lógica que decide qué modelo de IA usar según el mensaje |
+
+---
+
+## Cómo funciona por dentro
+
+```
+┌──────────────────────────────────────────────────────┐
+│  TELEGRAM  — canal de comunicación con el usuario    │
+└───────────────────────┬──────────────────────────────┘
+                        │ mensaje del usuario
+                        ▼
+┌──────────────────────────────────────────────────────┐
+│  handle_message()  en app.py                         │
+│  Lee el mensaje y decide qué hacer con él            │
+└──────┬───────────────────────────┬───────────────────┘
+       │                           │
+       ▼                           ▼
+┌──────────────┐          ┌────────────────────┐
+│  TOOLS       │          │  ROUTER            │
+│  (primero)   │          │  choose_model()    │
+│              │          └────────┬───────────┘
+│ "calcula…"  ─┼─▶ calculator.py  │
+│ "guarda…"   ─┼─▶ notes.py       ├── "rápido/corto" ─▶ GROQ (Llama 3.1)
+│ "recuerda…" ─┼─▶ memory.py      └── (por defecto) ──▶ GEMINI (Flash 2.0)
+└──────────────┘                                            │
+                                                            │ si falla
+                                                            ▼
+                                                     GROQ como fallback
+                                                     + prefijo [fallback]
+       │
+       ▼
+┌──────────────────────┐
+│  MEMORIA             │
+│  memory/users/       │
+│  {user_id}.json      │
+│  → hechos del usuario│
+│    se inyectan en    │
+│    el prompt de la IA│
+└──────────────────────┘
+```
+
+**Flujo en palabras**: el bot recibe un mensaje → revisa si es una tool (calculadora, notas) → si no, consulta la memoria del usuario → elige el modelo de IA → envía respuesta.
+
+---
+
+## Setup
+
+### Paso 1 — Clona el repo
+
+```bash
+git clone https://github.com/Fedgutcor/clase-agentes
+cd clase-agentes
+```
+
+### Paso 2 — Corre el setup guiado
 
 ```bash
 python setup.py
 ```
 
-Eso es todo. El script:
-- Crea el entorno virtual
-- Instala las dependencias
-- Te explica qué es cada API key y dónde obtenerla
-- Las guarda en `.env` de forma segura
-- Verifica que todo funcione
+El script hace todo por ti: crea el entorno virtual, instala librerías, te explica cada API key y dónde conseguirla, y las guarda en `.env`.
 
-### 3. Arranca el bot
+**Las tres API keys que necesitas:**
+
+| Key | Dónde obtenerla | Es gratis? |
+|-----|-----------------|-----------|
+| `TELEGRAM_TOKEN` | Habla con [@BotFather](https://t.me/BotFather) en Telegram | Sí |
+| `GEMINI_API_KEY` | [aistudio.google.com](https://aistudio.google.com/app/apikey) | Sí |
+| `GROQ_API_KEY` | [console.groq.com](https://console.groq.com/keys) | Sí |
+
+### Paso 3 — Arranca el bot
 
 ```bash
-source venv/bin/activate   # Mac / Linux
-venv\Scripts\activate      # Windows
+# Mac / Linux
+source venv/bin/activate
+python app.py
 
+# Windows
+venv\Scripts\activate
 python app.py
 ```
+
+Cuando veas el banner con "AGENTE IA — ONLINE", el bot está corriendo.  
+Abre Telegram, busca tu bot, y empieza a chatear.
 
 ---
 
 ## Comandos del bot
 
-| Mensaje | Qué hace |
-|---------|----------|
-| Cualquier texto | Responde con Gemini (o Groq si falla) |
-| `rápido qué es un agente` | Fuerza Groq — más veloz para respuestas cortas |
-| `calcula 45 * 12` | Calculadora integrada |
-| `guarda nota comprar leche` | Guarda una nota tuya |
-| `mis notas` | Lista todas tus notas |
-| `recuerda que estudio diseño` | Guarda un hecho en tu perfil |
+| Mensaje | Qué hace | Qué parte del código lo maneja |
+|---------|----------|-------------------------------|
+| Cualquier texto | Responde con Gemini (o Groq si falla) | `ask_ai()` en app.py |
+| `rápido qué es un agente` | Fuerza Groq — más veloz para respuestas cortas | `choose_model()` en app.py |
+| `calcula 45 * 12` | Calculadora integrada | `tools/calculator.py` |
+| `guarda nota comprar leche` | Guarda una nota tuya | `tools/notes.py` |
+| `mis notas` | Lista todas tus notas | `tools/notes.py` |
+| `recuerda que estudio diseño` | Guarda un hecho en tu perfil | `memory.py` |
 
 ---
 
 ## Tools extra (`tools/extras/`)
 
-10 herramientas listas para conectar al agente. Ninguna requiere API key adicional salvo las que ya tienes.
+10 herramientas listas para conectar. Ninguna requiere API key adicional salvo las que ya tienes.
 
 | Archivo | Qué hace | Comando de ejemplo |
 |---------|----------|--------------------|
@@ -112,24 +186,26 @@ python app.py
 | `pomodoro.py` | Temporizador Pomodoro | `pomodoro 25` |
 | `text_stats.py` | Estadísticas de un texto | `analiza texto: [tu texto]` |
 
-### Cómo conectar una tool
+### Cómo conectar una tool extra
 
-**1.** Importa la función en `app.py`:
+Son tres líneas de código en `app.py`. Por ejemplo, para activar el clima:
+
+**1. Importa la función** (arriba del todo en app.py, junto a los otros imports):
 
 ```python
 from tools.extras.weather import get_weather
 ```
 
-**2.** Agrega un bloque `if` en `handle_message`:
+**2. Agrega un bloque `if`** dentro de `handle_message`, antes de la parte de IA:
 
 ```python
 if message.lower().startswith("clima en "):
-    city = message[9:]
+    city = message[9:]                               # extrae la ciudad del mensaje
     await update.message.reply_text(get_weather(city))
-    return
+    return                                           # sale sin llamar a la IA
 ```
 
-**3.** Reinicia el bot. Listo.
+**3. Reinicia el bot.** Listo.
 
 > `reminder.py` y `pomodoro.py` requieren pasar `update` como callback — hay un ejemplo comentado dentro de cada archivo.
 
@@ -137,14 +213,15 @@ if message.lower().startswith("clima en "):
 
 ## Resiliencia por fallback
 
-El bot intenta Gemini primero. Si Gemini falla (cuota, red, modelo no disponible), cae automáticamente a Groq sin interrumpir la conversación.
+El bot intenta Gemini primero. Si Gemini falla (cuota agotada, red), cae a Groq sin interrumpir la conversación.
 
 ```
 Usuario → Gemini ✓ → respuesta normal
                ✗ → Groq → respuesta con prefijo [fallback groq]
 ```
 
-El prefijo es intencional: te avisa cuándo se usó el backup. Para quitarlo cuando ya no lo necesites, edita `app.py`:
+El prefijo `[fallback groq]` es intencional: te avisa cuándo se usó el backup.  
+Para quitarlo cuando ya no lo necesites, edita esta línea en `app.py`:
 
 ```python
 # antes
@@ -155,39 +232,15 @@ return response.choices[0].message.content
 
 ---
 
-## Estructura del proyecto
-
-```
-clase-agentes/
-├── app.py              ← punto de entrada, lógica principal
-├── memory.py           ← memoria por usuario (JSON)
-├── verify_setup.py     ← verifica que el setup está completo
-├── requirements.txt    ← dependencias
-├── .env.example        ← template de configuración (sin keys reales)
-├── .env                ← tus keys (no se sube a GitHub)
-├── prompts/
-│   ├── system.txt      ← personalidad base del agente
-│   └── personality.txt
-├── tools/
-│   ├── calculator.py
-│   ├── notes.py
-│   └── extras/         ← 10 tools adicionales opcionales
-├── memory/
-│   └── users/          ← un .json por usuario (generado al correr)
-└── logs/
-```
-
----
-
 ## Troubleshooting
 
-**El bot no responde y veo `quota` en el error**
+**El bot no responde y veo `quota` en el error**  
 Gemini tiene límite de tokens por minuto en el tier gratuito. Espera 30 segundos e intenta de nuevo.
 
-**El bot responde con `[fallback groq]`**
+**El bot responde con `[fallback groq]`**  
 Gemini alcanzó su cuota. El bot sigue funcionando — espera 1 minuto.
 
-**`Conflict: terminated by other getUpdates request`**
+**`Conflict: terminated by other getUpdates request`**  
 Hay dos instancias corriendo. Mátalas y reinicia:
 
 ```bash
@@ -200,18 +253,18 @@ taskkill /F /IM python.exe
 cd %USERPROFILE%\Downloads\clase-agentes && venv\Scripts\activate && python app.py
 ```
 
-**`AttributeError` en `_Updater` o `TypeError: proxies`**
+**`AttributeError` en `_Updater` o `TypeError: proxies`**  
 Versión de librería incompatible. Reinstala:
 
 ```bash
 pip install "python-telegram-bot==21.9" "groq>=1.2.0"
 ```
 
-**`404 models/gemini-1.5-flash is not found`**
+**`404 models/gemini-1.5-flash is not found`**  
 Modelo deprecado. Asegúrate de tener la versión actualizada de `app.py`.
 
-**No veo el archivo `.env`**
-Los archivos que empiezan con `.` están ocultos. Ábrelo desde la terminal:
+**No veo el archivo `.env`**  
+Los archivos que empiezan con `.` están ocultos por defecto:
 ```bash
 open -e .env      # Mac
 notepad .env      # Windows
@@ -219,7 +272,7 @@ notepad .env      # Windows
 
 ---
 
-> English version: [README.en.md](README.en.md)
+> Versión en inglés: [README.en.md](README.en.md)
 
 ---
 
