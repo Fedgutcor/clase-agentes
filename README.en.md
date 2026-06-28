@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/python-3.10+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
-> **In this class you build a Telegram bot with memory, custom tools, and two AI models that back each other up.**
+> **In this class you build a Telegram bot with memory, custom tools, and three AI models that back each other up.**
 
 ---
 
@@ -13,9 +13,10 @@ Telegram
    │
    ▼
  Router
- ├── "fast/quick" → Groq (Llama 3.1)
- └── default      → Gemini 2.0 Flash
-                       └── automatic fallback → Groq
+ ├── "fast/quick"    → Groq (Llama 3.1)
+ ├── "potente/exp."  → NVIDIA (Nemotron 70B)
+ └── default         → Gemini 2.0 Flash
+        └── automatic fallback chain → Gemini → Groq → NVIDIA
 
    + Manual tools
    ├── calculate ...      → calculator.py
@@ -46,7 +47,7 @@ python setup.py
 That's it. The script:
 - Creates the virtual environment
 - Installs all dependencies
-- Explains each API key and where to get it
+- Explains each API key and where to get it (Telegram, Gemini, Groq, **and NVIDIA** — get the latter at [build.nvidia.com](https://build.nvidia.com), the key starts with `nvapi-`)
 - Saves them securely to `.env`
 - Verifies everything works
 
@@ -65,8 +66,9 @@ python app.py
 
 | Message | What it does |
 |---------|--------------|
-| Any text | Responds with Gemini (or Groq if it fails) |
+| Any text | Responds with Gemini (or a backup if it fails) |
 | `fast what is an agent` | Forces Groq — faster for short answers |
+| `potente explain relativity` | Forces NVIDIA — larger model for hard questions |
 | `calculate 45 * 12` | Built-in calculator |
 | `save note buy milk` | Saves a note |
 | `my notes` | Lists all your notes |
@@ -116,20 +118,21 @@ if message.lower().startswith("weather in "):
 
 ## Fallback resilience
 
-The bot tries Gemini first. If Gemini fails (quota, network, unavailable model), it automatically falls back to Groq without interrupting the conversation.
+The bot tries Gemini first. If Gemini fails (quota, network, unavailable model), it walks down the fallback chain — Gemini → Groq → NVIDIA — without interrupting the conversation.
 
 ```
 User → Gemini ✓ → normal response
-            ✗ → Groq → response prefixed with [fallback groq]
+            ✗ → Groq ✓ → response prefixed with [fallback groq]
+                    ✗ → NVIDIA → response prefixed with [fallback nvidia]
 ```
 
-The prefix is intentional — it tells you when the backup was used. To remove it once you no longer need it, edit `app.py`:
+The prefix is intentional — it tells you which backup was used. To remove it once you no longer need it, edit the matching `return` in `app.py`:
 
 ```python
 # before
-return f"[fallback groq] {response.choices[0].message.content}"
+return f"[fallback groq] {_ask_groq(prompt)}"
 # after
-return response.choices[0].message.content
+return _ask_groq(prompt)
 ```
 
 ---
@@ -163,8 +166,14 @@ clase-agentes/
 **Bot doesn't respond and I see `quota` in the error**
 Gemini has a token-per-minute limit on the free tier. Wait 30 seconds and try again.
 
-**Bot responds with `[fallback groq]`**
-Gemini hit its quota. The bot keeps working — wait 1 minute.
+**Bot responds with `[fallback groq]` or `[fallback nvidia]`**
+The primary model failed, so the bot walked down the fallback chain (Gemini → Groq → NVIDIA). It means resilience is working — wait 1 minute.
+
+**`401`/`Unauthorized` when asking for something `potente`**
+The `NVIDIA_API_KEY` is empty or wrong. Make sure it starts with `nvapi-` in your `.env`. Regenerate it at [build.nvidia.com](https://build.nvidia.com) and re-run `python setup.py` if needed.
+
+**`ModuleNotFoundError: No module named 'openai'`**
+The NVIDIA client (OpenAI-compatible) is missing. With the venv active: `pip install openai`.
 
 **`Conflict: terminated by other getUpdates request`**
 Two instances are running. Kill them and restart:

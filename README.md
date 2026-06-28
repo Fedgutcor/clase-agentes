@@ -2,7 +2,9 @@
 
 ![Python](https://img.shields.io/badge/python-3.10+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
-> **En esta clase construyes un bot de Telegram con memoria, herramientas propias, y dos modelos de IA que se respaldan entre sí.**
+> **En esta clase construyes un bot de Telegram con memoria, herramientas propias, y tres modelos de IA que se respaldan entre sí.**
+>
+> *¿Nunca tocaste una terminal? Tranquilo. Esta guía asume cero experiencia: cada comando viene explicado, y al final hay un [glosario](#glosario--qué-significa-cada-palabra) con todas las palabras técnicas en lenguaje cotidiano.*
 
 ---
 
@@ -17,7 +19,9 @@
 7. [Cómo funciona por dentro](#cómo-funciona-por-dentro)
 8. [Comandos del bot](#comandos-del-bot)
 9. [Conectar herramientas extra](#conectar-herramientas-extra)
-10. [Troubleshooting](#troubleshooting)
+10. [Hasta dónde puedes llevarlo](#hasta-dónde-puedes-llevarlo)
+11. [Glosario — qué significa cada palabra](#glosario--qué-significa-cada-palabra)
+12. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -25,11 +29,21 @@
 
 Un bot de Telegram que:
 
-- Habla con dos modelos de IA (Gemini y Groq) y **elige cuál usar** según el mensaje
+- Habla con tres modelos de IA (Gemini, Groq y NVIDIA) y **elige cuál usar** según el mensaje
 - **Recuerda información** sobre cada usuario entre conversaciones
 - Tiene **herramientas propias**: calculadora, notas, y 10 extras que puedes activar
 
 No es un chatbot de juguete — tiene la misma arquitectura base de los agentes de producción.
+
+**Los tres modelos, en una frase:**
+
+| Modelo | Cuándo lo usa el bot | Por qué |
+|--------|----------------------|---------|
+| **Gemini** (Google) | Por defecto, para casi todo | Equilibrado: rápido y capaz |
+| **Groq** (Llama 3.1) | Cuando pides algo `rápido` | El más veloz para respuestas cortas |
+| **NVIDIA** (Nemotron 70B) | Cuando pides algo `potente` | El más grande, para preguntas difíciles |
+
+Y si uno falla, el bot pasa solo al siguiente. Nunca te quedas sin respuesta.
 
 ---
 
@@ -74,25 +88,41 @@ Verás una ventana con texto. Eso es la terminal. Está lista para recibir coman
 - Solo puedes ejecutar un comando a la vez — espera a que termine antes del siguiente
 - Si ves un error en rojo, es normal — el troubleshooting al final de esta guía cubre los más comunes
 
+> **Truco para no escribir a mano**: puedes **copiar** un comando de esta guía y **pegarlo** en la terminal.
+> - **Mac**: pegar es `Cmd + V`
+> - **Windows**: pegar es `Ctrl + V` (o click derecho dentro de la terminal)
+>
+> **No te asustes si la terminal "no hace nada" mientras escribes tu contraseña o una key**: por seguridad, algunos campos no muestran lo que tecleas (ni puntitos). Está escribiendo igual — presiona Enter al terminar.
+
 ---
 
 ## Cómo descargar el proyecto
 
-GitHub es donde está guardado el código. `git clone` lo descarga a tu computadora.
+GitHub es donde está guardado el código (como una "nube" de proyectos). **Git** es el programa que descarga ese código a tu computadora, y el comando `git clone` es el que hace la descarga.
 
-**Abre la terminal** y ejecuta estos dos comandos, uno por uno:
+**Abre la terminal** y ejecuta estos dos comandos, **uno por uno** (escribe el primero, Enter, espera a que termine, y recién ahí el segundo):
 
 ```bash
 git clone https://github.com/Fedgutcor/clase-agentes
 ```
 
-Esto descarga el proyecto y crea una carpeta llamada `clase-agentes` donde estés parado.
+Esto descarga el proyecto y crea una carpeta llamada `clase-agentes` donde estés parado. Mientras descarga vas a ver algo así — es normal:
+
+```
+Cloning into 'clase-agentes'...
+remote: Enumerating objects: 100% (...), done.
+Receiving objects: 100% (...), done.
+```
+
+Cuando vuelve a aparecer la línea para escribir, terminó. Ahora entra a la carpeta:
 
 ```bash
 cd clase-agentes
 ```
 
 `cd` significa "entrar a una carpeta" (*change directory*). Después de esto, todos los comandos que ejecutes se aplican dentro del proyecto.
+
+> **¿Cómo sé que estoy dentro de la carpeta?** El nombre `clase-agentes` aparece ahora en la línea de la terminal, antes del cursor. Esa línea (con la ruta o el nombre de carpeta) se llama el *prompt* — es la terminal diciéndote dónde estás parado.
 
 > **¿Dónde quedó la carpeta?**
 > - **Mac**: en tu carpeta de usuario (`/Users/tu-nombre/clase-agentes`). Puedes abrirla desde Finder.
@@ -159,6 +189,23 @@ El script te explica cada key mientras lo corres. Si prefieres conseguirlas ante
 4. Ponle un nombre (ej: "clase-agentes") — es solo para que tú la identifiques
 5. Se genera la clave. Se ve así: `gsk_abc123...`
 6. Cópiala en ese momento — Groq tampoco la vuelve a mostrar completa
+
+---
+
+#### API Key de NVIDIA — `NVIDIA_API_KEY`
+
+NVIDIA tiene una plataforma gratuita, **NVIDIA build**, para probar sus modelos de IA más grandes. Esta key es la que usa el bot cuando le pides algo `potente`.
+
+1. Entra a [build.nvidia.com](https://build.nvidia.com)
+2. Haz click en **"Login"** (arriba a la derecha) y crea una cuenta — puedes usar tu correo o tu cuenta de Google
+3. Una vez dentro, en el buscador escribe **`nemotron`** y abre el modelo **"llama-3.1-nemotron-70b-instruct"** (es el que usa el bot por defecto)
+4. En la página del modelo, a la derecha verás un panel de código con un botón **"Get API Key"** (o "Generate Key"). Haz click ahí
+5. Confirma y se genera la clave. Empieza con `nvapi-`, así: `nvapi-AbC123...`
+6. Cópiala enseguida — guárdala en un lugar seguro
+
+> **¿Por qué empieza con `nvapi-`?** Es solo el prefijo que NVIDIA le pone a todas sus keys, para reconocerlas de un vistazo. Igual que las de Groq empiezan con `gsk_`.
+>
+> La cuenta gratuita te da créditos de sobra para la clase. Si alguna vez se agotan, el bot sigue funcionando con Gemini y Groq.
 
 ---
 
@@ -248,7 +295,7 @@ Ejemplo: cuando escribes `calcula 45 * 12`, el bot llama a `calculator.py` y te 
 
 **Memoria** — Cada usuario tiene un archivo `.json` en `memory/users/`. Antes de responder, el bot lo lee e inyecta esa información en el prompt. Así "recuerda" cosas entre conversaciones.
 
-**Router** — La función `choose_model()` en `app.py` lee el mensaje y decide si mandar la pregunta a Gemini o a Groq. Si Gemini falla, cae automáticamente a Groq.
+**Router** — La función `choose_model()` en `app.py` lee el mensaje y decide a cuál de los tres modelos mandarlo: Groq si pediste algo `rápido`, NVIDIA si pediste algo `potente`, y Gemini para todo lo demás. Si el modelo por defecto falla, el bot baja por una cadena de respaldo (Gemini → Groq → NVIDIA) para que siempre haya respuesta.
 
 ---
 
@@ -271,13 +318,14 @@ Ejemplo: cuando escribes `calcula 45 * 12`, el bot llama a `calculator.py` y te 
 │  (primero)   │          │  choose_model()    │
 │              │          └────────┬───────────┘
 │ "calcula…"  ─┼─▶ calculator.py  │
-│ "guarda…"   ─┼─▶ notes.py       ├─ "rápido/corto" ──▶ GROQ (Llama 3.1)
-│ "recuerda…" ─┼─▶ memory.py      └─ (por defecto) ───▶ GEMINI (Flash 2.0)
-└──────────────┘                                             │
-                                                             │ si Gemini falla
-                                                             ▼
-                                                      GROQ como respaldo
-                                                      + aviso [fallback]
+│ "guarda…"   ─┼─▶ notes.py       ├─ "rápido/corto" ───▶ GROQ (Llama 3.1)
+│ "recuerda…" ─┼─▶ memory.py      ├─ "potente/exp."  ─▶ NVIDIA (Nemotron 70B)
+└──────────────┘                  └─ (por defecto) ───▶ GEMINI (Flash 2.0)
+                                                             │
+                                                             │ si falla, baja por la
+                                                             ▼ cadena de respaldo:
+                                                   GEMINI → GROQ → NVIDIA
+                                                   + aviso [fallback ...]
        │
        ▼
 ┌──────────────────────┐
@@ -290,7 +338,7 @@ Ejemplo: cuando escribes `calcula 45 * 12`, el bot llama a `calculator.py` y te 
 └──────────────────────┘
 ```
 
-**En palabras**: el bot recibe un mensaje → revisa si es una tool (calculadora, notas) → si no lo es, consulta la memoria del usuario → elige el modelo de IA → envía la respuesta.
+**En palabras**: el bot recibe un mensaje → revisa si es una tool (calculadora, notas) → si no lo es, consulta la memoria del usuario → elige el modelo de IA (Gemini, Groq o NVIDIA) → envía la respuesta.
 
 ---
 
@@ -298,8 +346,9 @@ Ejemplo: cuando escribes `calcula 45 * 12`, el bot llama a `calculator.py` y te 
 
 | Mensaje | Qué hace | Archivo que lo maneja |
 |---------|----------|-----------------------|
-| Cualquier texto | Responde con Gemini (o Groq si falla) | `app.py` → `ask_ai()` |
+| Cualquier texto | Responde con Gemini (o el respaldo si falla) | `app.py` → `ask_ai()` |
 | `rápido qué es un agente` | Fuerza Groq — más veloz para respuestas cortas | `app.py` → `choose_model()` |
+| `potente explícame la relatividad` | Fuerza NVIDIA — modelo más grande para preguntas difíciles | `app.py` → `choose_model()` |
 | `calcula 45 * 12` | Calculadora integrada | `tools/calculator.py` |
 | `guarda nota comprar leche` | Guarda una nota tuya | `tools/notes.py` |
 | `mis notas` | Lista todas tus notas | `tools/notes.py` |
@@ -359,6 +408,69 @@ python app.py
 
 ---
 
+## Hasta dónde puedes llevarlo
+
+Terminaste la clase y tienes un agente funcionando. Esto no es el techo — es la base. Acá van ideas para seguir, ordenadas de más fácil a más ambiciosa. No necesitas hacerlas todas: elige la que te dé curiosidad.
+
+**Cambiar el modelo de NVIDIA (5 minutos).**
+En `build.nvidia.com` hay decenas de modelos. En `app.py`, dentro de la función `_ask_nvidia`, cambia el texto del `model=` por el nombre de otro modelo del catálogo (ej. uno más grande, o uno especializado en código). Reinicia el bot y compara las respuestas. Así aprendes que *cambiar de cerebro es cambiar una línea*.
+
+**Inventar tu propio comando de router (10 minutos).**
+Hoy `rápido` manda a Groq y `potente` a NVIDIA. Abre `choose_model()` y agrega tu propia palabra clave — por ejemplo, que `código` siempre vaya a un modelo bueno programando. Es el mismo patrón, copiado.
+
+**Activar más herramientas (15 minutos).**
+Ya tienes 10 tools listas en `tools/extras/`. Sigue la receta de [Conectar herramientas extra](#conectar-herramientas-extra) y enciende clima, traductor, búsqueda web... Cada una son ~4 líneas en `app.py`.
+
+**Escribir tu primera herramienta propia.**
+Una tool es solo una función de Python que devuelve texto. Copia `tools/calculator.py`, cámbiale la lógica por lo que quieras (un conversor, un generador de contraseñas, lo que sea) y conéctala como cualquier extra. El bot no sabe la diferencia.
+
+**Darle más personalidad.**
+Abre `prompts/system.txt` y `prompts/personality.txt` y reescríbelos. No tocas ni una línea de código: cambias *quién es* el agente. Pruébalo — la diferencia es inmediata.
+
+**Conceptos para investigar cuando quieras crecer:**
+
+| Concepto | Qué te abre |
+|----------|-------------|
+| **Function calling / tool use** | Que la IA decida *sola* qué herramienta usar, en vez de detectarlo con `startswith` |
+| **RAG** (búsqueda + IA) | Que el bot responda usando *tus* documentos, no solo lo que el modelo ya sabe |
+| **Bases de datos** (SQLite) | Reemplazar los archivos `.json` de memoria por algo que escale a miles de usuarios |
+| **Despliegue** (deploy) | Sacar el bot de tu computadora y dejarlo corriendo 24/7 en un servidor |
+| **Streaming** | Que las respuestas aparezcan palabra por palabra, como en ChatGPT |
+
+> No corras a aprender todo de golpe. Elige UNA cosa, hazla funcionar, y disfruta el momento en que cae la ficha. Así se construye de verdad.
+
+---
+
+## Glosario — qué significa cada palabra
+
+Si en algún punto una palabra te frenó, búscala acá. Todo en lenguaje cotidiano.
+
+| Palabra | En cristiano |
+|---------|-------------|
+| **Terminal** | La ventana de texto donde escribes comandos. La "consola" de tu computadora. |
+| **Comando** | Una orden que escribes en la terminal y ejecutas con Enter (ej: `python app.py`). |
+| **Git** | Un programa para descargar y manejar código que vive en internet. |
+| **GitHub** | El sitio web donde está guardado el código de este proyecto (y de millones más). |
+| **Clonar** (`git clone`) | Descargar una copia del proyecto a tu computadora. |
+| **Repositorio** (repo) | La carpeta de un proyecto con todo su código e historial. Esto que clonaste es un repo. |
+| **Directorio / carpeta** | Lo mismo que una carpeta en tu computadora. `cd` sirve para entrar a una. |
+| **Python** | El lenguaje de programación en el que está escrito el bot. |
+| **Librería** | Código que otros ya escribieron y tú reutilizas (ej: `rich`, `openai`). |
+| **Dependencias** | Las librerías que el proyecto necesita para funcionar. Están en `requirements.txt`. |
+| **Entorno virtual** (venv) | Una caja aislada con las librerías de *este* proyecto, para no mezclarlas con el resto. |
+| **API** | La forma en que dos programas se hablan entre sí por internet. |
+| **API key** | Una credencial secreta que te identifica ante un servicio (Gemini, Groq, NVIDIA). |
+| **Token** (de Telegram) | La API key específica de tu bot de Telegram: su usuario y contraseña juntos. |
+| **`.env`** | El archivo donde se guardan tus keys. Nunca se sube a GitHub. |
+| **Variable de entorno** | Un dato de configuración que el código lee del sistema (tus keys llegan así). |
+| **Modelo** (LLM) | El "cerebro" de IA que genera las respuestas. Acá hay tres: Gemini, Groq, NVIDIA. |
+| **Prompt** | El texto que le mandas a la IA. También: la línea de la terminal lista para tu comando. |
+| **Router** | La función que decide a cuál modelo mandar cada mensaje. |
+| **Fallback** | El plan B: si un modelo falla, el bot usa otro automáticamente. |
+| **Tool** (herramienta) | Una función que el bot ejecuta directo, sin pasar por la IA (ej: la calculadora). |
+
+---
+
 ## Troubleshooting
 
 **No reconoce el comando `python`**  
@@ -371,8 +483,17 @@ python3 app.py
 **El bot no responde y veo `quota` en el error**  
 Gemini tiene un límite de uso por minuto en la cuenta gratuita. Espera 30 segundos e intenta de nuevo.
 
-**El bot responde con `[fallback groq]`**  
-Gemini alcanzó su cuota. El bot sigue funcionando con Groq — espera 1 minuto y Gemini vuelve.
+**El bot responde con `[fallback groq]` o `[fallback nvidia]`**  
+El modelo principal (Gemini) alcanzó su cuota o falló, así que el bot bajó por la cadena de respaldo (Gemini → Groq → NVIDIA). Es señal de que el fallback funciona. Espera 1 minuto y Gemini vuelve.
+
+**Al pedir algo `potente` veo un error `401` o `Unauthorized`**  
+La `NVIDIA_API_KEY` está vacía o mal copiada. Confirma que en tu `.env` empiece con `nvapi-` y no tenga espacios. Si dudas, vuelve a generarla en [build.nvidia.com](https://build.nvidia.com) y corre `python setup.py` de nuevo para pegarla.
+
+**`ModuleNotFoundError: No module named 'openai'`**  
+Falta la librería de NVIDIA (usa el cliente de OpenAI). Con el entorno activado:
+```bash
+pip install openai
+```
 
 **`Conflict: terminated by other getUpdates request`**  
 Hay dos instancias del bot corriendo al mismo tiempo. Ciérralas todas y reinicia:
