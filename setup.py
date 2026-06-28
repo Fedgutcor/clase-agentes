@@ -119,6 +119,7 @@ deps.add_column(style="dim")
 deps.add_row("python-telegram-bot", "habla con la API de Telegram por nosotros")
 deps.add_row("google-genai",        "cliente oficial de Gemini 2.0 (Google AI)")
 deps.add_row("groq",                "cliente de Groq — corre Llama 3.1 con hardware especializado")
+deps.add_row("openai",              "cliente compatible con NVIDIA build (modelos potentes)")
 deps.add_row("python-dotenv",       "carga el archivo .env como variables de entorno")
 deps.add_row("rich",                "la librería que hace que esta terminal se vea así")
 
@@ -241,10 +242,20 @@ groq_key = get_key(
     "    una GPU para inferencia de LLMs. Es el fallback y la opción 'rápido'.",
 )
 
+nvidia_key = get_key(
+    "NVIDIA_API_KEY",
+    "La key para acceder a NVIDIA build, que sirve modelos grandes y potentes.",
+    "build.nvidia.com → iniciá sesión → elegí un modelo → Get API Key → Generate Key",
+    "NVIDIA build expone modelos como Nemotron 70B con una API compatible con OpenAI.\n"
+    "    Es la opción 'potente' y el último respaldo si Gemini y Groq fallan. La key\n"
+    "    empieza con [cyan]nvapi-[/cyan].",
+)
+
 with open(".env", "w") as f:
     f.write(f"TELEGRAM_TOKEN={telegram_token}\n")
     f.write(f"GEMINI_API_KEY={gemini_key}\n")
     f.write(f"GROQ_API_KEY={groq_key}\n")
+    f.write(f"NVIDIA_API_KEY={nvidia_key}\n")
 
 console.print()
 ok("Keys guardadas en [cyan].env[/cyan]")

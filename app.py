@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, filters, ContextTypes
 from google import genai
-from google.genai import errors as genai_errors
 from groq import Groq
+from openai import OpenAI  # NVIDIA build usa una API compatible con la de OpenAI
 
 from rich.console import Console
 from rich.panel import Panel
@@ -38,6 +38,14 @@ log = logging.getLogger("bot")
 gemini      = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
+# NVIDIA build (build.nvidia.com) ofrece modelos muy potentes con una API
+# compatible con la de OpenAI. Por eso reutilizamos el cliente de OpenAI, pero
+# apuntándolo al servidor de NVIDIA con base_url. Misma forma de llamar, otro servidor.
+nvidia_client = OpenAI(
+    api_key=os.getenv("NVIDIA_API_KEY"),
+    base_url="https://integrate.api.nvidia.com/v1",
+)
+
 # ── Prompts ───────────────────────────────────────────────────────────────────
 # El "system prompt" es lo que le dice a la IA quién es y cómo debe comportarse.
 # Lo guardamos en archivos .txt para poder editarlo sin tocar el código.
@@ -45,44 +53,69 @@ groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 SYSTEM = open("prompts/system.txt").read() + "\n" + open("prompts/personality.txt").read()
 
 # ── Router ────────────────────────────────────────────────────────────────────
-# El router decide qué modelo usar según el mensaje.
-# Si el usuario pide algo rápido/simple → Groq (más veloz).
-# Para todo lo demás → Gemini (más capaz).
+# El router decide qué modelo usar según el mensaje. Tres opciones:
+#   • "rápido/corto/simple" → Groq   (más veloz, respuestas cortas)
+#   • "potente/experto/difícil" → NVIDIA (modelo grande, razonamiento difícil)
+#   • todo lo demás          → Gemini (equilibrado, opción por defecto)
 
 def choose_model(message: str) -> str:
-    if any(w in message.lower() for w in ["rápido", "rapido", "corto", "simple"]):
+    msg = message.lower()
+    if any(w in msg for w in ["rápido", "rapido", "corto", "simple"]):
         return "groq"
+    if any(w in msg for w in ["potente", "experto", "difícil", "dificil"]):
+        return "nvidia"
     return "gemini"
 
 # ── IA ────────────────────────────────────────────────────────────────────────
-# Esta función construye el prompt completo y llama al modelo elegido.
-# Si Gemini falla, automáticamente intenta con Groq (fallback).
+# Cada función de abajo sabe hablarle a UN modelo y devolver su respuesta en texto.
+# Tener una función por modelo deja el código claro y fácil de extender.
+
+def _ask_groq(prompt: str) -> str:
+    response = groq_client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content
+
+def _ask_nvidia(prompt: str) -> str:
+    # Podés cambiar este modelo por cualquier otro del catálogo de build.nvidia.com.
+    response = nvidia_client.chat.completions.create(
+        model="nvidia/llama-3.1-nemotron-70b-instruct",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content
+
+def _ask_gemini(prompt: str) -> str:
+    response = gemini.models.generate_content(
+        model="gemini-2.0-flash", contents=prompt
+    )
+    return response.text
+
+# Esta función arma el prompt completo y llama al modelo elegido.
+# Si el modelo por defecto (Gemini) falla, baja por la cadena de respaldo
+# Gemini → Groq → NVIDIA para que el usuario nunca se quede sin respuesta.
 
 def ask_ai(model: str, user_context: str, message: str) -> str:
     # Armamos el prompt completo: personalidad + memoria del usuario + mensaje actual
     prompt = f"{SYSTEM}\n{user_context}\nUsuario: {message}"
 
+    # Si el router pidió un modelo concreto distinto de Gemini, lo usamos directo.
     if model == "groq":
-        response = groq_client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return response.choices[0].message.content
+        return _ask_groq(prompt)
+    if model == "nvidia":
+        return _ask_nvidia(prompt)
 
+    # Modelo por defecto: Gemini, con respaldo automático si algo falla.
     try:
-        response = gemini.models.generate_content(
-            model="gemini-2.0-flash", contents=prompt
-        )
-        return response.text
-    except (genai_errors.APIError, genai_errors.ServerError, genai_errors.ClientError) as e:
-        # Gemini falló (cuota, red, etc.) → usamos Groq como respaldo
-        log.warning(f"Gemini falló ({e}) — usando Groq como fallback")
-        response = groq_client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            messages=[{"role": "user", "content": prompt}],
-        )
-        # El prefijo [fallback groq] avisa que no fue la respuesta principal
-        return f"[fallback groq] {response.choices[0].message.content}"
+        return _ask_gemini(prompt)
+    except Exception as e:
+        log.warning(f"Gemini falló ({e}) — intento con Groq")
+    try:
+        # El prefijo [fallback ...] avisa que no respondió el modelo principal.
+        return f"[fallback groq] {_ask_groq(prompt)}"
+    except Exception as e:
+        log.warning(f"Groq falló ({e}) — intento con NVIDIA")
+    return f"[fallback nvidia] {_ask_nvidia(prompt)}"
 
 # ── Comando /start ────────────────────────────────────────────────────────────
 # Se ejecuta cuando alguien abre el bot por primera vez o escribe /start.
@@ -104,6 +137,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "   → recuérdame en 10 minutos: llamar al médico\n\n"
         "⚡ Responder rápido con Groq\n"
         "   → rápido qué es una API\n\n"
+        "💪 Responder con un modelo experto (NVIDIA)\n"
+        "   → potente explícame la teoría de la relatividad\n\n"
         "Para todo lo demás, escríbeme y te respondo con Gemini. 🤖"
     )
     _console.print(f"  [dim cyan]▸[/dim cyan] /start — {username}")
@@ -176,7 +211,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     model        = choose_model(message)
     response     = ask_ai(model, user_context, message)
 
-    model_color = "green" if model == "gemini" else "yellow"
+    model_color = {"gemini": "green", "groq": "yellow", "nvidia": "#76b900"}.get(model, "white")
     _console.print(
         f"  [dim {model_color}]  ↳ {model.upper()}[/dim {model_color}]  "
         f"[dim]{response[:80]}{'…' if len(response) > 80 else ''}[/dim]"
@@ -199,7 +234,7 @@ def _print_banner(restored: int):
     banner.append("╚═════╝  ╚═════╝    ╚═╝\n",   style="bold cyan")
     banner.append("\n")
     banner.append("  🤖  AGENTE IA — ONLINE\n",   style="bold white")
-    banner.append("  Telegram · Gemini · Groq\n", style="dim")
+    banner.append("  Telegram · Gemini · Groq · NVIDIA\n", style="dim")
     _console.print(Panel(banner, border_style="cyan", box=box.DOUBLE, padding=(0, 4)))
 
     router = Table(box=box.SIMPLE, show_header=False, padding=(0, 2))
@@ -207,7 +242,8 @@ def _print_banner(restored: int):
     router.add_column()
     router.add_column(style="dim")
     router.add_row("├──", "[bold green]Gemini 2.0 Flash[/bold green]", "default")
-    router.add_row("└──", "[bold yellow]Groq Llama 3.1[/bold yellow]", "rápido / fallback")
+    router.add_row("├──", "[bold yellow]Groq Llama 3.1[/bold yellow]", "rápido")
+    router.add_row("└──", "[bold #76b900]NVIDIA Nemotron 70B[/bold #76b900]", "potente / fallback")
 
     _console.print()
     _console.print(Padding("[bold]Router activo[/bold]", (0, 0, 0, 2)))

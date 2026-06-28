@@ -51,6 +51,8 @@ CHECKS = [
      "pip install google-genai"),
     ("groq",                  lambda: __import__("groq"),
      "pip install groq"),
+    ("openai",                lambda: __import__("openai"),
+     "pip install openai"),
     ("python-dotenv",         lambda: __import__("dotenv"),
      "pip install python-dotenv"),
     (".env existe",           lambda: open(".env").close(),
@@ -90,6 +92,7 @@ KEY_CHECKS = [
     ("TELEGRAM_TOKEN", "@BotFather en Telegram → /newbot → copiá el token"),
     ("GEMINI_API_KEY", "aistudio.google.com → Get API key"),
     ("GROQ_API_KEY",   "console.groq.com → API Keys → Create"),
+    ("NVIDIA_API_KEY", "build.nvidia.com → elegí un modelo → Get API Key"),
 ]
 
 console.print()
