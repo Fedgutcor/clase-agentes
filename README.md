@@ -11,9 +11,9 @@
 ## Índice
 
 1. [Qué vas a construir](#qué-vas-a-construir)
-2. [Herramientas que vas a usar](#herramientas-que-vas-a-usar)
-3. [Cómo abrir la terminal](#cómo-abrir-la-terminal)
-4. [Cómo descargar el proyecto](#cómo-descargar-el-proyecto)
+2. [Antes de empezar](#antes-de-empezar)
+3. [La forma fácil — Codespaces (sin instalar nada)](#la-forma-fácil--codespaces-sin-instalar-nada)
+4. [La forma local — en tu computadora](#la-forma-local--en-tu-computadora)
 5. [Setup paso a paso](#setup-paso-a-paso)
 6. [Qué hace cada parte del proyecto](#qué-hace-cada-parte-del-proyecto)
 7. [Cómo funciona por dentro](#cómo-funciona-por-dentro)
@@ -47,7 +47,49 @@ Y si uno falla, el bot pasa solo al siguiente. Nunca te quedas sin respuesta.
 
 ---
 
-## Herramientas que vas a usar
+## Antes de empezar
+
+Esto es lo único que necesitas tener listo. Son cuentas gratis, sin tarjeta de crédito.
+
+- [ ] Una cuenta de **Telegram** (la app de mensajería) — [telegram.org](https://telegram.org)
+- [ ] Una cuenta de **Google** (para la key de Gemini) — seguramente ya tienes una
+- [ ] Una cuenta de **GitHub** — [github.com/signup](https://github.com/signup)
+
+**Tiempo:** unos 20-30 minutos la primera vez. No tienes que terminar de una sentada.
+
+**Ahora elige tu camino.** Hay dos formas de hacer la clase. Hacen exactamente lo mismo — cambia solo *dónde* corre el bot:
+
+| | 🟢 La forma fácil (Codespaces) | 💻 La forma local |
+|---|---|---|
+| **Dónde corre** | En tu navegador, en la nube | En tu propia computadora |
+| **¿Instalas algo?** | **Nada** | Python + Git |
+| **Ideal para** | Empezar sin complicarte | Tener todo en tu máquina |
+
+> **Si nunca programaste, usa Codespaces.** Te ahorra instalar Python y Git —que es donde más gente se traba— y te da una terminal lista con un par de clicks. Lee la sección de abajo y sáltate por completo "La forma local".
+
+---
+
+## La forma fácil — Codespaces (sin instalar nada)
+
+GitHub Codespaces te presta una computadora en la nube con **todo preinstalado**, dentro de tu navegador. No instalas Python, ni Git, ni nada en tu máquina.
+
+1. Entra al repositorio: **[github.com/Fedgutcor/clase-agentes](https://github.com/Fedgutcor/clase-agentes)**
+2. Haz click en el botón verde **`< > Code`** (arriba a la derecha de la lista de archivos)
+3. Elige la pestaña **"Codespaces"** y haz click en **"Create codespace on main"**
+4. Espera 1-2 minutos. Se abre un editor (es VS Code) dentro del navegador, con Python y Git ya listos.
+5. En la parte de abajo verás una **terminal**. Si no aparece, abre el menú **`☰`** (arriba a la izquierda) → **Terminal → New Terminal**. Ahí vas a escribir los comandos.
+
+Eso es todo. **Salta directo a [Setup paso a paso](#setup-paso-a-paso)** y corre `python setup.py` en esa terminal. El resto de la guía funciona igual.
+
+> Codespaces es gratis hasta 60 horas al mes — de sobra para esta clase. Cuando termines, ciérralo en **[github.com/codespaces](https://github.com/codespaces)** (botón `...` → *Stop*) para no gastar horas mientras no lo usas.
+
+---
+
+## La forma local — en tu computadora
+
+> **¿Usaste Codespaces?** Entonces sáltate toda esta sección y ve directo a [Setup paso a paso](#setup-paso-a-paso). Esto es solo para quien quiere instalar el proyecto en su propia máquina.
+
+### Herramientas que vas a usar
 
 Antes de instalar nada, asegúrate de tener esto:
 
@@ -56,17 +98,26 @@ Antes de instalar nada, asegúrate de tener esto:
 | **Python 3.10+** | El lenguaje en que está escrito el bot | En la terminal: `python --version` |
 | **Git** | Para descargar el proyecto desde GitHub | En la terminal: `git --version` |
 
-Si alguno de esos comandos dice "command not found":
+Si alguno de esos comandos dice "command not found" (no lo reconoce), instálalo:
 - **Python**: descárgalo en [python.org/downloads](https://www.python.org/downloads/) — instala la versión más reciente
 - **Git**: descárgalo en [git-scm.com/downloads](https://git-scm.com/downloads)
 
----
+> ⚠️ **Importante en Windows — el error #1 de toda la clase:** cuando instalas Python, la **primera** pantalla del instalador tiene, abajo, una casilla que dice **"Add Python to PATH"** (o "Add python.exe to PATH"). **MÁRCALA antes de continuar.** Si no lo haces, Windows no encontrará el comando `python` y nada funcionará — y el error no dice que la causa fue esa casilla. Si ya instalaste sin marcarla: desinstala Python desde "Agregar o quitar programas" y vuelve a instalarlo marcando la casilla.
 
-## Cómo abrir la terminal
+Después de instalar, **cierra y vuelve a abrir la terminal**, y confirma que ambos responden:
+
+```bash
+python --version
+git --version
+```
+
+Si los dos te muestran un número de versión (ej: `Python 3.12.1`), estás listo para seguir.
+
+### Cómo abrir la terminal
 
 La **terminal** es la ventana negra donde escribes comandos de texto. Todo lo que hagas en esta guía pasa ahí.
 
-### En Mac
+#### En Mac
 
 1. Presiona `Cmd + Espacio` para abrir Spotlight
 2. Escribe `Terminal`
@@ -74,7 +125,7 @@ La **terminal** es la ventana negra donde escribes comandos de texto. Todo lo qu
 
 Verás una ventana con texto. Eso es la terminal. Está lista para recibir comandos.
 
-### En Windows
+#### En Windows
 
 1. Presiona `Win + R`
 2. Escribe `cmd`
@@ -82,7 +133,7 @@ Verás una ventana con texto. Eso es la terminal. Está lista para recibir coman
 
 > **Recomendado en Windows**: usa **PowerShell** en lugar de cmd. Para abrirlo: click derecho en el botón de Inicio → "Windows PowerShell".
 
-### Cómo usar la terminal
+#### Cómo usar la terminal
 
 - Escribes un comando y presionas **Enter** para ejecutarlo
 - Solo puedes ejecutar un comando a la vez — espera a que termine antes del siguiente
@@ -96,11 +147,23 @@ Verás una ventana con texto. Eso es la terminal. Está lista para recibir coman
 
 ---
 
-## Cómo descargar el proyecto
+### Cómo descargar el proyecto
 
-GitHub es donde está guardado el código (como una "nube" de proyectos). **Git** es el programa que descarga ese código a tu computadora, y el comando `git clone` es el que hace la descarga.
+GitHub es donde está guardado el código (como una "nube" de proyectos). Hay dos maneras de bajarlo. Elige una:
 
-**Abre la terminal** y ejecuta estos dos comandos, **uno por uno** (escribe el primero, Enter, espera a que termine, y recién ahí el segundo):
+**Opción A — sin Git (la más simple):**
+
+1. Entra a [github.com/Fedgutcor/clase-agentes](https://github.com/Fedgutcor/clase-agentes)
+2. Haz click en el botón verde **`< > Code`** → **"Download ZIP"**
+3. Descomprime el archivo (doble click en Windows; en Mac se descomprime solo)
+4. Mueve la carpeta `clase-agentes` a un lugar fácil de encontrar, por ejemplo tu Escritorio
+5. Abre la terminal y entra a esa carpeta con `cd` (ver abajo qué significa)
+
+Con esta opción no necesitas Git instalado. La desventaja: para traer cambios futuros tienes que volver a descargar el ZIP (con Git bastaría un `git pull`).
+
+**Opción B — con Git (recomendada si lo tienes):**
+
+**Git** es un programa que descarga y maneja código; el comando `git clone` hace la descarga. **Abre la terminal** y ejecuta estos dos comandos, **uno por uno** (escribe el primero, Enter, espera a que termine, y recién ahí el segundo):
 
 ```bash
 git clone https://github.com/Fedgutcor/clase-agentes
@@ -134,7 +197,7 @@ cd clase-agentes
 
 ### Paso 1 — Instala las dependencias
 
-Asegúrate de estar dentro de la carpeta del proyecto (si acabas de clonar, ya lo estás).
+Asegúrate de estar dentro de la carpeta del proyecto (si usaste Codespaces o acabas de clonar, ya lo estás).
 
 Ejecuta en la terminal:
 
@@ -284,6 +347,7 @@ clase-agentes/
 │   └── users/          ← un archivo .json por usuario (se crea solo al correr)
 │
 ├── requirements.txt    ← lista de librerías Python que necesita el proyecto
+├── .devcontainer/      ← receta del entorno en la nube (lo usa Codespaces)
 ├── .env.example        ← plantilla del archivo de configuración (sin datos reales)
 └── .env                ← tus API keys reales (nunca se sube a GitHub)
 ```
@@ -451,6 +515,7 @@ Si en algún punto una palabra te frenó, búscala acá. Todo en lenguaje cotidi
 | **Comando** | Una orden que escribes en la terminal y ejecutas con Enter (ej: `python app.py`). |
 | **Git** | Un programa para descargar y manejar código que vive en internet. |
 | **GitHub** | El sitio web donde está guardado el código de este proyecto (y de millones más). |
+| **Codespaces** | Una computadora en la nube, con todo preinstalado, que abres dentro del navegador. |
 | **Clonar** (`git clone`) | Descargar una copia del proyecto a tu computadora. |
 | **Repositorio** (repo) | La carpeta de un proyecto con todo su código e historial. Esto que clonaste es un repo. |
 | **Directorio / carpeta** | Lo mismo que una carpeta en tu computadora. `cd` sirve para entrar a una. |

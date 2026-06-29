@@ -31,6 +31,8 @@ Telegram
 
 ## Setup
 
+> **No-install option (recommended if you're new):** open the repo on GitHub → green **`< > Code`** button → **Codespaces** tab → **Create codespace on main**. You get a ready-to-use terminal in your browser (Python + Git preinstalled). Skip step 1 below and jump straight to `python setup.py`.
+
 ### 1. Clone the repo and enter the folder
 
 ```bash
