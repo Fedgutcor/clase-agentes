@@ -1,0 +1,12 @@
+{
+  "name": "Clase Agentes IA",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python"
+      ]
+    }
+  },
+  "postCreateCommand": "echo 'Entorno listo. Abre una terminal y corre: python setup.py'"
+}
