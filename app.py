@@ -80,7 +80,7 @@ def _ask_groq(prompt: str) -> str:
 def _ask_nvidia(prompt: str) -> str:
     # Podés cambiar este modelo por cualquier otro del catálogo de build.nvidia.com.
     response = nvidia_client.chat.completions.create(
-        model="nvidia/llama-3.1-nemotron-70b-instruct",
+        model="meta/llama-3.3-70b-instruct",
         messages=[{"role": "user", "content": prompt}],
     )
     return response.choices[0].message.content
@@ -243,7 +243,7 @@ def _print_banner(restored: int):
     router.add_column(style="dim")
     router.add_row("├──", "[bold green]Gemini 2.0 Flash[/bold green]", "default")
     router.add_row("├──", "[bold yellow]Groq Llama 3.1[/bold yellow]", "rápido")
-    router.add_row("└──", "[bold #76b900]NVIDIA Nemotron 70B[/bold #76b900]", "potente / fallback")
+    router.add_row("└──", "[bold #76b900]NVIDIA Llama 3.3 70B[/bold #76b900]", "potente / fallback")
 
     _console.print()
     _console.print(Padding("[bold]Router activo[/bold]", (0, 0, 0, 2)))

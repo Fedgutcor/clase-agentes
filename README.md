@@ -41,7 +41,7 @@ No es un chatbot de juguete — tiene la misma arquitectura base de los agentes 
 |--------|----------------------|---------|
 | **Gemini** (Google) | Por defecto, para casi todo | Equilibrado: rápido y capaz |
 | **Groq** (Llama 3.1) | Cuando pides algo `rápido` | El más veloz para respuestas cortas |
-| **NVIDIA** (Nemotron 70B) | Cuando pides algo `potente` | El más grande, para preguntas difíciles |
+| **NVIDIA** (Llama 3.3 70B) | Cuando pides algo `potente` | El más grande, para preguntas difíciles |
 
 Y si uno falla, el bot pasa solo al siguiente. Nunca te quedas sin respuesta.
 
@@ -198,7 +198,7 @@ NVIDIA tiene una plataforma gratuita, **NVIDIA build**, para probar sus modelos 
 
 1. Entra a [build.nvidia.com](https://build.nvidia.com)
 2. Haz click en **"Login"** (arriba a la derecha) y crea una cuenta — puedes usar tu correo o tu cuenta de Google
-3. Una vez dentro, en el buscador escribe **`nemotron`** y abre el modelo **"llama-3.1-nemotron-70b-instruct"** (es el que usa el bot por defecto)
+3. Una vez dentro, en el buscador escribe **`llama 3.3`** y abre el modelo **"llama-3.3-70b-instruct"** (es el que usa el bot por defecto)
 4. En la página del modelo, a la derecha verás un panel de código con un botón **"Get API Key"** (o "Generate Key"). Haz click ahí
 5. Confirma y se genera la clave. Empieza con `nvapi-`, así: `nvapi-AbC123...`
 6. Cópiala enseguida — guárdala en un lugar seguro
@@ -319,7 +319,7 @@ Ejemplo: cuando escribes `calcula 45 * 12`, el bot llama a `calculator.py` y te 
 │              │          └────────┬───────────┘
 │ "calcula…"  ─┼─▶ calculator.py  │
 │ "guarda…"   ─┼─▶ notes.py       ├─ "rápido/corto" ───▶ GROQ (Llama 3.1)
-│ "recuerda…" ─┼─▶ memory.py      ├─ "potente/exp."  ─▶ NVIDIA (Nemotron 70B)
+│ "recuerda…" ─┼─▶ memory.py      ├─ "potente/exp."  ─▶ NVIDIA (Llama 3.3 70B)
 └──────────────┘                  └─ (por defecto) ───▶ GEMINI (Flash 2.0)
                                                              │
                                                              │ si falla, baja por la

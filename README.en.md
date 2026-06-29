@@ -14,7 +14,7 @@ Telegram
    ▼
  Router
  ├── "fast/quick"    → Groq (Llama 3.1)
- ├── "potente/exp."  → NVIDIA (Nemotron 70B)
+ ├── "potente/exp."  → NVIDIA (Llama 3.3 70B)
  └── default         → Gemini 2.0 Flash
         └── automatic fallback chain → Gemini → Groq → NVIDIA
 

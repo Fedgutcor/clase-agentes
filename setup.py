@@ -246,7 +246,7 @@ nvidia_key = get_key(
     "NVIDIA_API_KEY",
     "La key para acceder a NVIDIA build, que sirve modelos grandes y potentes.",
     "build.nvidia.com → iniciá sesión → elegí un modelo → Get API Key → Generate Key",
-    "NVIDIA build expone modelos como Nemotron 70B con una API compatible con OpenAI.\n"
+    "NVIDIA build expone modelos grandes (Llama 3.3 70B) con una API compatible con OpenAI.\n"
     "    Es la opción 'potente' y el último respaldo si Gemini y Groq fallan. La key\n"
     "    empieza con [cyan]nvapi-[/cyan].",
 )
