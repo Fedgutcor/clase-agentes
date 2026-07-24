@@ -223,8 +223,9 @@ El script te explica cada key mientras lo corres. Si prefieres conseguirlas ante
 5. BotFather te responde con un mensaje que incluye el token. Se ve así:
    ```
    Use this token to access the HTTP API:
-   7123456789:AAHdqTcvCH1vGWJxfSeofSPs38eEjcwdkjQ
+   7123456789:ABCdefGHIjklMNOpqrsTUVwxyz_EJEMPLO
    ```
+   (token de ejemplo, no es válido — el tuyo lo genera BotFather en el paso anterior)
 6. Copia ese token — es tu `TELEGRAM_TOKEN`
 
 > El username del bot es cómo lo van a encontrar en Telegram. Una vez creado, puedes hablarle buscando `@mi_agente_ia_bot`.
