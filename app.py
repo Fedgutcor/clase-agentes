@@ -16,6 +16,7 @@ from rich.padding import Padding
 from rich import box
 
 import memory as mem
+from models import GEMINI_MODEL, GROQ_MODEL, NVIDIA_MODEL  # qué modelo usa cada proveedor
 from tools.calculator import calculate
 from tools.notes import save_note, list_notes
 from tools.extras.reminder import set_reminder, restore_reminders
@@ -69,25 +70,25 @@ def choose_model(message: str) -> str:
 # ── IA ────────────────────────────────────────────────────────────────────────
 # Cada función de abajo sabe hablarle a UN modelo y devolver su respuesta en texto.
 # Tener una función por modelo deja el código claro y fácil de extender.
+# El nombre exacto de cada modelo vive en models.py (y se puede cambiar desde el .env).
 
 def _ask_groq(prompt: str) -> str:
     response = groq_client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model=GROQ_MODEL,
         messages=[{"role": "user", "content": prompt}],
     )
     return response.choices[0].message.content
 
 def _ask_nvidia(prompt: str) -> str:
-    # Podés cambiar este modelo por cualquier otro del catálogo de build.nvidia.com.
     response = nvidia_client.chat.completions.create(
-        model="meta/llama-3.3-70b-instruct",
+        model=NVIDIA_MODEL,
         messages=[{"role": "user", "content": prompt}],
     )
     return response.choices[0].message.content
 
 def _ask_gemini(prompt: str) -> str:
     response = gemini.models.generate_content(
-        model="gemini-2.0-flash", contents=prompt
+        model=GEMINI_MODEL, contents=prompt
     )
     return response.text
 
@@ -241,9 +242,10 @@ def _print_banner(restored: int):
     router.add_column(no_wrap=True)
     router.add_column()
     router.add_column(style="dim")
-    router.add_row("├──", "[bold green]Gemini 2.0 Flash[/bold green]", "default")
-    router.add_row("├──", "[bold yellow]Groq Llama 3.1[/bold yellow]", "rápido")
-    router.add_row("└──", "[bold #76b900]NVIDIA Llama 3.3 70B[/bold #76b900]", "potente / fallback")
+    # Los nombres salen de models.py: el banner siempre muestra el modelo que de verdad se usa.
+    router.add_row("├──", f"[bold green]Gemini[/bold green] [dim]{GEMINI_MODEL}[/dim]", "default")
+    router.add_row("├──", f"[bold yellow]Groq[/bold yellow] [dim]{GROQ_MODEL}[/dim]", "rápido")
+    router.add_row("└──", f"[bold #76b900]NVIDIA[/bold #76b900] [dim]{NVIDIA_MODEL}[/dim]", "potente / fallback")
 
     _console.print()
     _console.print(Padding("[bold]Router activo[/bold]", (0, 0, 0, 2)))

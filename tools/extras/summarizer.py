@@ -6,6 +6,8 @@ Requiere: GROQ_API_KEY
 import os
 from groq import Groq
 
+from models import GROQ_MODEL  # el mismo modelo de Groq que usa el bot (ver models.py)
+
 _client = None
 
 def _get_client():
@@ -19,7 +21,7 @@ def summarize(text: str) -> str:
         return "El texto es muy corto para resumir."
     try:
         response = _get_client().chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model=GROQ_MODEL,
             messages=[{
                 "role": "user",
                 "content": f"Resume el siguiente texto en 3 puntos clave, en el mismo idioma del texto:\n\n{text}"
