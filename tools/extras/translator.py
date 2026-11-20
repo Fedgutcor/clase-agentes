@@ -6,6 +6,8 @@ Requiere: GROQ_API_KEY (ya la tienes configurada)
 import os
 from groq import Groq
 
+from models import GROQ_MODEL  # el mismo modelo de Groq que usa el bot (ver models.py)
+
 # El cliente se crea una sola vez y se reutiliza (_client empieza en None)
 _client = None
 
@@ -30,7 +32,7 @@ def translate(target_lang: str, text: str) -> str:
     lang = LANGUAGES.get(target_lang.lower(), target_lang)  # si no está en el mapa, usa el texto tal cual
     try:
         response = _get_client().chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model=GROQ_MODEL,
             messages=[{
                 "role": "user",
                 # Le pedimos explícitamente que devuelva SOLO la traducción,

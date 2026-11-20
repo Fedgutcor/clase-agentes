@@ -40,10 +40,12 @@ No es un chatbot de juguete — tiene la misma arquitectura base de los agentes 
 | Modelo | Cuándo lo usa el bot | Por qué |
 |--------|----------------------|---------|
 | **Gemini** (Google) | Por defecto, para casi todo | Equilibrado: rápido y capaz |
-| **Groq** (Llama 3.1) | Cuando pides algo `rápido` | El más veloz para respuestas cortas |
-| **NVIDIA** (Llama 3.3 70B) | Cuando pides algo `potente` | El más grande, para preguntas difíciles |
+| **Groq** (un modelo abierto en chips especiales) | Cuando pides algo `rápido` | El más veloz para respuestas cortas |
+| **NVIDIA** (Nemotron, un modelo grande que razona) | Cuando pides algo `potente` | El más grande, para preguntas difíciles. Tarda unos segundos más porque *piensa* antes de responder |
 
 Y si uno falla, el bot pasa solo al siguiente. Nunca te quedas sin respuesta.
+
+> **¿Cuál modelo exacto usa cada uno?** Está escrito en un solo archivo: `models.py`. Los proveedores retiran modelos cada pocos meses; cuando eso pase, `python verify_setup.py` te dirá cuál falló y cómo cambiarlo (ver [Troubleshooting](#troubleshooting)).
 
 ---
 
@@ -262,7 +264,7 @@ NVIDIA tiene una plataforma gratuita, **NVIDIA build**, para probar sus modelos 
 
 1. Entra a [build.nvidia.com](https://build.nvidia.com)
 2. Haz click en **"Login"** (arriba a la derecha) y crea una cuenta — puedes usar tu correo o tu cuenta de Google
-3. Una vez dentro, en el buscador escribe **`llama 3.3`** y abre el modelo **"llama-3.3-70b-instruct"** (es el que usa el bot por defecto)
+3. Una vez dentro, abre cualquier modelo del catálogo — por ejemplo, escribe **`nemotron`** en el buscador y abre el primero que aparezca. La key que vas a generar sirve para todos los modelos, no solo para ese
 4. En la página del modelo, a la derecha verás un panel de código con un botón **"Get API Key"** (o "Generate Key"). Haz click ahí
 5. Confirma y se genera la clave. Empieza con `nvapi-`, así: `nvapi-AbC123...`
 6. Cópiala enseguida — guárdala en un lugar seguro
@@ -302,7 +304,7 @@ Sabrás que funcionó porque aparecerá `(venv)` al inicio de la línea en tu te
 python verify_setup.py
 ```
 
-Esto comprueba que las API keys están bien configuradas antes de arrancar. Si algo falla, te dice exactamente qué.
+Esto comprueba que las API keys están bien configuradas y le hace una pregunta corta a cada modelo para confirmar que responde. Si algo falla, te dice exactamente qué y cómo arreglarlo.
 
 ### Paso 4 — Arranca el bot
 
@@ -332,8 +334,9 @@ clase-agentes/
 │
 ├── app.py              ← el cerebro del bot — aquí empieza y termina todo
 ├── memory.py           ← cómo el bot guarda y recuerda datos de cada usuario
+├── models.py           ← qué modelo de IA usa cada proveedor (se cambia aquí o en el .env)
 ├── setup.py            ← instalación guiada (solo se corre una vez)
-├── verify_setup.py     ← verifica que el setup esté correcto
+├── verify_setup.py     ← verifica el setup y prueba que cada modelo responda
 │
 ├── prompts/
 │   ├── system.txt      ← la personalidad del agente: qué le dijiste que ES
@@ -383,9 +386,9 @@ Ejemplo: cuando escribes `calcula 45 * 12`, el bot llama a `calculator.py` y te 
 │  (primero)   │          │  choose_model()    │
 │              │          └────────┬───────────┘
 │ "calcula…"  ─┼─▶ calculator.py  │
-│ "guarda…"   ─┼─▶ notes.py       ├─ "rápido/corto" ───▶ GROQ (Llama 3.1)
-│ "recuerda…" ─┼─▶ memory.py      ├─ "potente/exp."  ─▶ NVIDIA (Llama 3.3 70B)
-└──────────────┘                  └─ (por defecto) ───▶ GEMINI (Flash 2.0)
+│ "guarda…"   ─┼─▶ notes.py       ├─ "rápido/corto" ───▶ GROQ (el más veloz)
+│ "recuerda…" ─┼─▶ memory.py      ├─ "potente/exp."  ─▶ NVIDIA (el más grande)
+└──────────────┘                  └─ (por defecto) ───▶ GEMINI (equilibrado)
                                                              │
                                                              │ si falla, baja por la
                                                              ▼ cadena de respaldo:
@@ -478,7 +481,9 @@ python app.py
 Terminaste la clase y tienes un agente funcionando. Esto no es el techo — es la base. Acá van ideas para seguir, ordenadas de más fácil a más ambiciosa. No necesitas hacerlas todas: elige la que te dé curiosidad.
 
 **Cambiar el modelo de NVIDIA (5 minutos).**
-En `build.nvidia.com` hay decenas de modelos. En `app.py`, dentro de la función `_ask_nvidia`, cambia el texto del `model=` por el nombre de otro modelo del catálogo (ej. uno más grande, o uno especializado en código). Reinicia el bot y compara las respuestas. Así aprendes que *cambiar de cerebro es cambiar una línea*.
+En `build.nvidia.com` hay decenas de modelos. Abre `models.py` y cambia el valor de `NVIDIA_MODEL` por el nombre de otro modelo del catálogo (ej. uno especializado en código). Reinicia el bot y compara las respuestas. Así aprendes que *cambiar de cerebro es cambiar una línea*.
+
+> Ojo: algunos modelos "razonan" y entregan su respuesta en un campo distinto. Si después del cambio el bot responde vacío o con un error, ese modelo no encaja con el código tal como está — prueba con otro y corre `python verify_setup.py` para confirmar.
 
 **Inventar tu propio comando de router (10 minutos).**
 Hoy `rápido` manda a Groq y `potente` a NVIDIA. Abre `choose_model()` y agrega tu propia palabra clave — por ejemplo, que `código` siempre vaya a un modelo bueno programando. Es el mismo patrón, copiado.
@@ -584,11 +589,14 @@ Versión de librería incompatible. En la terminal (con el entorno activado):
 pip install "python-telegram-bot==21.9" "groq>=1.2.0"
 ```
 
-**`404 models/gemini-1.5-flash is not found`**  
-Estás usando una versión antigua de `app.py`. Descarga la versión actualizada del repo:
-```bash
-git pull
-```
+**El bot no responde y veo `404`, `410`, `not found`, `no longer available` o `model_not_found`**  
+El proveedor retiró el modelo. Pasa cada pocos meses: a este repo ya le ocurrió con `gemini-1.5-flash`, `gemini-2.0-flash` y los modelos Llama de Groq y NVIDIA. Tienes dos salidas:
+
+1. Descarga la versión más reciente del repo, que trae modelos vigentes:
+   ```bash
+   git pull
+   ```
+2. Si el repo todavía no se actualizó, corre `python verify_setup.py`: te dice qué modelo falló. Busca uno vigente en el catálogo de ese proveedor y agrégalo a tu `.env` (por ejemplo `GROQ_MODEL=nombre-del-modelo`). Reinicia el bot.
 
 **No veo el archivo `.env` en el Explorador / Finder**  
 Los archivos que empiezan con `.` están ocultos por defecto. Ábrelo desde la terminal:

@@ -13,9 +13,9 @@ Telegram
    │
    ▼
  Router
- ├── "fast/quick"    → Groq (Llama 3.1)
- ├── "potente/exp."  → NVIDIA (Llama 3.3 70B)
- └── default         → Gemini 2.0 Flash
+ ├── "rápido/corto"  → Groq (fastest)
+ ├── "potente/exp."  → NVIDIA (largest, reasons before answering)
+ └── default         → Gemini (balanced)
         └── automatic fallback chain → Gemini → Groq → NVIDIA
 
    + Manual tools
@@ -145,7 +145,8 @@ return _ask_groq(prompt)
 clase-agentes/
 ├── app.py              ← entry point, main logic
 ├── memory.py           ← per-user memory (JSON)
-├── verify_setup.py     ← checks that setup is complete
+├── models.py           ← which AI model each provider uses (change it here or in .env)
+├── verify_setup.py     ← checks the setup and pings each model with a real question
 ├── requirements.txt    ← dependencies
 ├── .env.example        ← config template (no real keys)
 ├── .env                ← your keys (never committed to GitHub)
@@ -197,8 +198,8 @@ Incompatible library version. Reinstall:
 pip install "python-telegram-bot==21.9" "groq>=1.2.0"
 ```
 
-**`404 models/gemini-1.5-flash is not found`**
-Deprecated model. Make sure you have the latest version of `app.py`.
+**The bot stops answering and you see `404`, `410`, `not found`, `no longer available` or `model_not_found`**
+The provider retired the model — it happens every few months. Either run `git pull` to get the latest models, or run `python verify_setup.py` to see which model failed, pick a current one from that provider's catalog, and add it to your `.env` (e.g. `GROQ_MODEL=model-name`). The defaults live in `models.py`.
 
 **I can't see the `.env` file**
 Files starting with `.` are hidden by default. Open it directly from the terminal:

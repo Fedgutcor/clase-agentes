@@ -117,8 +117,8 @@ deps = Table(box=box.SIMPLE, padding=(0, 2), show_header=False)
 deps.add_column(style="cyan bold", no_wrap=True)
 deps.add_column(style="dim")
 deps.add_row("python-telegram-bot", "habla con la API de Telegram por nosotros")
-deps.add_row("google-genai",        "cliente oficial de Gemini 2.0 (Google AI)")
-deps.add_row("groq",                "cliente de Groq — corre Llama 3.1 con hardware especializado")
+deps.add_row("google-genai",        "cliente oficial de Gemini (Google AI)")
+deps.add_row("groq",                "cliente de Groq — corre modelos abiertos con hardware especializado")
 deps.add_row("openai",              "cliente compatible con NVIDIA build (modelos potentes)")
 deps.add_row("python-dotenv",       "carga el archivo .env como variables de entorno")
 deps.add_row("rich",                "la librería que hace que esta terminal se vea así")
@@ -126,8 +126,8 @@ deps.add_row("rich",                "la librería que hace que esta terminal se 
 console.print(Padding(deps, (0, 0, 1, 4)))
 
 info(
-    "[dim]Nota:[/dim] si tenés [dim]google-generativeai[/dim] instalado, lo desinstalamos primero.\n"
-    "    El modelo [cyan]gemini-2.0-flash[/cyan] requiere la SDK nueva ([cyan]google-genai[/cyan])."
+    "[dim]Nota:[/dim] si tienes [dim]google-generativeai[/dim] instalado, lo desinstalamos primero.\n"
+    "    Los modelos actuales de Gemini requieren la SDK nueva ([cyan]google-genai[/cyan])."
 )
 console.print()
 
@@ -221,7 +221,7 @@ def get_key(name, what, where, why) -> str:
 telegram_token = get_key(
     "TELEGRAM_TOKEN",
     "El token que identifica a tu bot de Telegram.",
-    "Telegram → buscá @BotFather → /newbot → seguí los pasos → copiá el token",
+    "Telegram → busca @BotFather → /newbot → sigue los pasos → copia el token",
     "Sin este token el bot no puede conectarse a Telegram. Es como el usuario y\n"
     "    la contraseña del bot juntos. Cada bot tiene el suyo — no lo compartas.",
 )
@@ -236,7 +236,7 @@ gemini_key = get_key(
 
 groq_key = get_key(
     "GROQ_API_KEY",
-    "La key para acceder a Groq, que corre Llama 3.1 con hardware especializado.",
+    "La key para acceder a Groq, que corre modelos abiertos con hardware especializado.",
     "console.groq.com → API Keys → Create API key",
     "Groq usa chips LPU (Language Processing Unit) — notablemente más rápidos que\n"
     "    una GPU para inferencia de LLMs. Es el fallback y la opción 'rápido'.",
@@ -245,8 +245,8 @@ groq_key = get_key(
 nvidia_key = get_key(
     "NVIDIA_API_KEY",
     "La key para acceder a NVIDIA build, que sirve modelos grandes y potentes.",
-    "build.nvidia.com → iniciá sesión → elegí un modelo → Get API Key → Generate Key",
-    "NVIDIA build expone modelos grandes (Llama 3.3 70B) con una API compatible con OpenAI.\n"
+    "build.nvidia.com → inicia sesión → elige un modelo → Get API Key → Generate Key",
+    "NVIDIA build expone modelos grandes (como Nemotron) con una API compatible con OpenAI.\n"
     "    Es la opción 'potente' y el último respaldo si Gemini y Groq fallan. La key\n"
     "    empieza con [cyan]nvapi-[/cyan].",
 )
@@ -268,7 +268,7 @@ step(4, "Verificación final")
 
 info(
     "Corremos [cyan]verify_setup.py[/cyan] dentro del entorno virtual para confirmar\n"
-    "    que cada librería importa y cada key está cargada correctamente."
+    "    que cada librería importa, cada key está cargada y cada modelo responde."
 )
 console.print()
 
@@ -294,7 +294,7 @@ if result.returncode == 0:
 else:
     console.print(Panel(
         "[red]Algo falló en la verificación.[/red]\n\n"
-        "Revisá los errores de arriba y corregílos antes de arrancar el bot.",
+        "Revisa los errores de arriba y corrígelos antes de arrancar el bot.",
         border_style="red",
         box=box.ROUNDED,
         padding=(1, 4),
