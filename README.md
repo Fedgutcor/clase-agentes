@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/avatar.png" alt="Mascota del proyecto: un robot sonriente" width="180">
+</p>
+
 # Construye tu primer agente IA
 
 ![Python](https://img.shields.io/badge/python-3.10+-blue) ![License](https://img.shields.io/badge/license-MIT-green)

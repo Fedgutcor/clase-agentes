@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/avatar.png" alt="Project mascot: a smiling robot" width="180">
+</p>
+
 # Build Your First AI Agent
 
 ![Python](https://img.shields.io/badge/python-3.10+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
