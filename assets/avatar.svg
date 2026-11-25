@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFD54A"/>
+      <stop offset="1" stop-color="#FF8A5B"/>
+    </linearGradient>
+    <linearGradient id="head" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E6EEFF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- fondo -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="90" cy="90" r="46" fill="#FFFFFF" opacity="0.18"/>
+  <circle cx="440" cy="430" r="70" fill="#FFFFFF" opacity="0.14"/>
+
+  <!-- antena -->
+  <line x1="256" y1="118" x2="256" y2="80" stroke="#2B3A67" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="256" cy="68" r="17" fill="#FF4F81"/>
+  <circle cx="250" cy="62" r="5" fill="#FFFFFF" opacity="0.8"/>
+
+  <!-- orejas -->
+  <rect x="82" y="232" width="34" height="84" rx="17" fill="#2B3A67"/>
+  <rect x="396" y="232" width="34" height="84" rx="17" fill="#2B3A67"/>
+
+  <!-- cabeza -->
+  <rect x="104" y="118" width="304" height="260" rx="96" fill="url(#head)" stroke="#2B3A67" stroke-width="10"/>
+
+  <!-- pantalla de la cara -->
+  <rect x="140" y="160" width="232" height="176" rx="70" fill="#2B3A67"/>
+
+  <!-- ojos -->
+  <ellipse cx="206" cy="234" rx="25" ry="30" fill="#7DF9FF"/>
+  <ellipse cx="306" cy="234" rx="25" ry="30" fill="#7DF9FF"/>
+  <circle cx="214" cy="224" r="9" fill="#FFFFFF"/>
+  <circle cx="314" cy="224" r="9" fill="#FFFFFF"/>
+
+  <!-- cachetes -->
+  <ellipse cx="172" cy="282" rx="17" ry="10" fill="#FF4F81" opacity="0.65"/>
+  <ellipse cx="340" cy="282" rx="17" ry="10" fill="#FF4F81" opacity="0.65"/>
+
+  <!-- sonrisa -->
+  <path d="M214 290 Q256 332 298 290" fill="none" stroke="#7DF9FF" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- cuerpito -->
+  <path d="M176 392 Q256 360 336 392 L336 440 Q336 470 306 470 L206 470 Q176 470 176 440 Z" fill="#FFFFFF" stroke="#2B3A67" stroke-width="10" stroke-linejoin="round"/>
+  <!-- corazoncito -->
+  <path d="M256 438 C226 418 232 396 248 396 C254 396 256 402 256 402 C256 402 258 396 264 396 C280 396 286 418 256 438 Z" fill="#FF4F81"/>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1280 640" width="1280" height="640">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFD54A"/>
+      <stop offset="1" stop-color="#FF8A5B"/>
+    </linearGradient>
+    <clipPath id="round"><rect x="90" y="120" width="400" height="400" rx="80"/></clipPath>
+  </defs>
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <circle cx="1180" cy="90" r="120" fill="#FFFFFF" opacity="0.14"/>
+  <circle cx="640" cy="640" r="150" fill="#FFFFFF" opacity="0.10"/>
+  <g clip-path="url(#round)"><image xlink:href="avatar.png" x="90" y="120" width="400" height="400"/></g>
+  <rect x="90" y="120" width="400" height="400" rx="80" fill="none" stroke="#2B3A67" stroke-width="8"/>
+  <text x="540" y="290" font-family="DejaVu Sans, Arial, sans-serif" font-weight="bold" font-size="58" fill="#2B3A67">Construye tu primer</text>
+  <text x="540" y="360" font-family="DejaVu Sans, Arial, sans-serif" font-weight="bold" font-size="58" fill="#FFFFFF">agente IA</text>
+  <text x="542" y="425" font-family="DejaVu Sans, Arial, sans-serif" font-size="27" fill="#2B3A67">Un bot de Telegram con memoria, herramientas</text>
+  <text x="542" y="465" font-family="DejaVu Sans, Arial, sans-serif" font-size="27" fill="#2B3A67">y tres modelos de IA que se respaldan entre sí</text>
+</svg>

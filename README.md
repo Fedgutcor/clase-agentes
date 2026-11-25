@@ -1,5 +1,9 @@
 # Construye tu primer agente IA
 
+<p align="center">
+  <img src="assets/banner.png" alt="Construye tu primer agente IA: un robot sonriente como mascota" width="100%">
+</p>
+
 ![Python](https://img.shields.io/badge/python-3.10+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
 > **En esta clase construyes un bot de Telegram con memoria, herramientas propias, y tres modelos de IA que se respaldan entre sí.**
