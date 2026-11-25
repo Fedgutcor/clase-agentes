@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/avatar.png" alt="Mascota del proyecto: un robot sonriente" width="180">
+  <img src="assets/banner.png" alt="Construye tu primer agente IA: un robot sonriente como mascota" width="100%">
 </p>
 
 # Construye tu primer agente IA

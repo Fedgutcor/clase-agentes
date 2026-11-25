@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/avatar.png" alt="Project mascot: a smiling robot" width="180">
+  <img src="assets/banner.png" alt="Build your first AI agent: a smiling robot mascot" width="100%">
 </p>
 
 # Build Your First AI Agent
