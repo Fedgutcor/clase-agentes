@@ -1,8 +1,8 @@
+# Construye tu primer agente IA
+
 <p align="center">
   <img src="assets/banner.png" alt="Construye tu primer agente IA: un robot sonriente como mascota" width="100%">
 </p>
-
-# Construye tu primer agente IA
 
 ![Python](https://img.shields.io/badge/python-3.10+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 

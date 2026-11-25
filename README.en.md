@@ -1,8 +1,8 @@
+# Build Your First AI Agent
+
 <p align="center">
   <img src="assets/banner.png" alt="Build your first AI agent: a smiling robot mascot" width="100%">
 </p>
-
-# Build Your First AI Agent
 
 ![Python](https://img.shields.io/badge/python-3.10+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
